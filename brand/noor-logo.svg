@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141a3c"/>
+      <stop offset="0.55" stop-color="#0d1430"/>
+      <stop offset="1" stop-color="#06302e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.58" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#ffd98a" stop-opacity="0.42"/>
+      <stop offset="0.45" stop-color="#f3b450" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#f3b450" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="aurora" cx="0.2" cy="1.05" r="0.75">
+      <stop offset="0" stop-color="#2fd6a5" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#2fd6a5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="moon" x1="0.15" y1="0.1" x2="0.85" y2="0.95">
+      <stop offset="0" stop-color="#fff3cf"/>
+      <stop offset="0.45" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#e59a2f"/>
+    </linearGradient>
+    <linearGradient id="star" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffe7a8"/>
+    </linearGradient>
+    <mask id="crescent">
+      <rect width="1024" height="1024" fill="black"/>
+      <circle cx="470" cy="530" r="290" fill="white"/>
+      <circle cx="590" cy="440" r="250" fill="black"/>
+    </mask>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#aurora)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <!-- tiny stars -->
+  <g fill="#ffffff">
+    <circle cx="210" cy="220" r="5" opacity="0.7"/>
+    <circle cx="300" cy="150" r="3" opacity="0.5"/>
+    <circle cx="820" cy="760" r="4" opacity="0.5"/>
+    <circle cx="860" cy="250" r="3.5" opacity="0.6"/>
+    <circle cx="160" cy="430" r="3" opacity="0.45"/>
+    <circle cx="760" cy="860" r="3" opacity="0.4"/>
+  </g>
+  <!-- crescent glow + crescent -->
+  <g mask="url(#crescent)">
+    <rect width="1024" height="1024" fill="#ffc560" filter="url(#soft)" opacity="0.55"/>
+  </g>
+  <g mask="url(#crescent)">
+    <rect width="1024" height="1024" fill="url(#moon)"/>
+  </g>
+  <!-- four-point sparkle (light, "noor") -->
+  <g transform="translate(668 392)">
+    <circle r="70" fill="#fff1c4" opacity="0.28" filter="url(#soft)"/>
+    <path d="M0 -118 C 14 -30 30 -14 118 0 C 30 14 14 30 0 118 C -14 30 -30 14 -118 0 C -30 -14 -14 -30 0 -118 Z" fill="url(#star)"/>
+  </g>
+  <g transform="translate(780 560) scale(0.32)">
+    <path d="M0 -118 C 14 -30 30 -14 118 0 C 30 14 14 30 0 118 C -14 30 -30 14 -118 0 C -30 -14 -14 -30 0 -118 Z" fill="#ffffff" opacity="0.85"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["crates/mackit-core", "crates/nexa-prayer", "crates/nexa-widgets", "src-tauri"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+rust-version = "1.82"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = true
+
+# Image decoding is painfully slow without optimisation; keep dev builds usable.
+[profile.dev.package."*"]
+opt-level = 3

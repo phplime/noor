@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Noor",
+  "version": "0.1.0",
+  "identifier": "dev.nazmul.noor",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1440",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Noor",
+        "width": 430,
+        "height": 900,
+        "minWidth": 360,
+        "minHeight": 640,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob: https://tile.openstreetmap.org; media-src 'self' data: blob: https://everyayah.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://api.open-meteo.com",
+      "freezePrototype": true
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "app"
+    ],
+    "category": "public.app-category.lifestyle",
+    "shortDescription": "Prayer times, reminders and photo tools",
+    "longDescription": "Noor brings Nexa Island's prayer times, water tracker, timer, world clock and to-do together with MacKit's photo tools and notes — with scheduled reminders that ring even when the app is closed.",
+    "copyright": "© 2026 Nazmul",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "iOS": {
+      "minimumSystemVersion": "15.0"
+    }
+  }
+}

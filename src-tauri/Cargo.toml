@@ -1,0 +1,52 @@
+[package]
+name = "noor"
+version = "0.1.0"
+description = "Noor — prayer times, reminders and photo tools for iPhone (MacKit + Nexa Island)"
+authors = ["Nazmul"]
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "noor_lib"
+path = "src/lib.rs"
+# staticlib: linked into the iOS app by Xcode; rlib: used by the desktop preview binary.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "noor"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+tempfile = "3"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+chrono-tz = "0.10"
+iana-time-zone = "0.1"
+time = "0.3"
+mackit-core = { path = "../crates/mackit-core" }
+nexa-prayer = { path = "../crates/nexa-prayer" }
+nexa-widgets = { path = "../crates/nexa-widgets" }
+
+# MacKit's scrolling module is compiled (macOS desktop preview) but not used on iOS.
+core-foundation = "0.10"
+core-foundation-sys = "0.8"
+
+# iOS: Save to Photos / share sheet (src/ios_share.rs)
+[target.'cfg(target_os = "ios")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSString", "NSURL", "NSArray"] }
+block2 = "0.6"
+
+[features]
+macos-typecheck = []
+
+[dev-dependencies]

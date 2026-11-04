@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Noor opens the photos you choose so you can edit them on your iPhone.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Noor can save edited photos to your library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Noor uses your location to calculate accurate prayer times and to show how far you are from your quiet places. It never leaves your iPhone.</string>
+</dict>
+</plist>

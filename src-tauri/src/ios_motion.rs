@@ -1,0 +1,52 @@
+//! Step counts from the iPhone's motion coprocessor (CoreMotion's CMPedometer,
+//! the same source the Health app uses). Needs no HealthKit entitlement — only
+//! the "Motion & Fitness" permission. The Swift class `NoorMotion`
+//! (gen/apple/Sources/noor/NoorMotion.swift) does the work; we call it by name.
+
+/// (date "YYYY-MM-DD", steps) for the last `days` days, today included.
+/// Empty when not on iPhone, not allowed, or not built in. Blocks briefly: call off the main thread.
+pub fn step_counts(days: u32) -> Vec<(String, u32)> {
+    #[cfg(target_os = "ios")]
+    {
+        return imp::step_counts(days);
+    }
+    #[cfg(not(target_os = "ios"))]
+    {
+        let _ = days;
+        Vec::new()
+    }
+}
+
+pub fn available() -> bool {
+    #[cfg(target_os = "ios")]
+    {
+        return imp::available();
+    }
+    #[cfg(not(target_os = "ios"))]
+    false
+}
+
+#[cfg(target_os = "ios")]
+mod imp {
+    use objc2::msg_send;
+    use objc2::rc::Retained;
+    use objc2::runtime::{AnyClass, Bool};
+    use objc2_foundation::NSString;
+
+    fn class() -> Option<&'static AnyClass> {
+        AnyClass::get(c"NoorMotion")
+    }
+
+    pub fn available() -> bool {
+        let Some(cls) = class() else { return false };
+        let ok: Bool = unsafe { msg_send![cls, available] };
+        ok.as_bool()
+    }
+
+    pub fn step_counts(days: u32) -> Vec<(String, u32)> {
+        let Some(cls) = class() else { return Vec::new() };
+        let json: Retained<NSString> = unsafe { msg_send![cls, stepsJSON: days as isize] };
+        let text = json.to_string();
+        serde_json::from_str::<Vec<(String, u32)>>(&text).unwrap_or_default()
+    }
+}

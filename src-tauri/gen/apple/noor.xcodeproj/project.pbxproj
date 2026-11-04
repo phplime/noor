@@ -1,0 +1,727 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0213A8F2F9CAB0B7F55A5C27 /* NoorWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741F0214F2A9A74637790732 /* NoorWidgetBundle.swift */; };
+		0F662A19A293349794C5043D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 049D61929C33F4BFAC2C8F37 /* Security.framework */; };
+		12F32B11C8C0EE25C4982BD6 /* NoorLive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C729DAECBF9777223F48F2 /* NoorLive.swift */; };
+		1357A5DBABC525E13967E932 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D3285F441E18CE72E4638FE /* UIKit.framework */; };
+		218AC38221059623C7E94CC5 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 1BB6ED061B055F7A3B683F64 /* assets */; };
+		30C069D05C780B7D3A5136A0 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796330516B5C8621867C212D /* CoreMotion.framework */; };
+		38873266F66E0B63B97315D2 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = CAE57ADB115E590E6A4342A9 /* main.mm */; };
+		4FD97AB41A9EE08D066A2343 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 68EA840AC502F7F6D27E00EA /* Assets.xcassets */; };
+		7E5F0698EEA7E41185750B92 /* NoorPrayerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A7DEEAC7089E2C7F318996 /* NoorPrayerLiveActivity.swift */; };
+		89C36D15D4B21302B1080138 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E41C68F181D0DB4B8ECC3C7F /* ActivityKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		8DE371B22F3B51135C4960FE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EBBC5E904F4728CED9505FA5 /* LaunchScreen.storyboard */; };
+		95A1C4A51884D132B0FD5801 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A520BA1737A53C9D77DA3CC0 /* WidgetKit.framework */; };
+		9EEC61FBE60FDADD7E3195A3 /* libapp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A197E4378CB5BEF8ECD4FF9 /* libapp.a */; };
+		A12B5B8703419182D2074407 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FC68EF7877FB5E573749D63 /* SwiftUI.framework */; };
+		A34C8124FB3EE0D8D5637483 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DAC298B6D3EB16C9EEE9613 /* MetalKit.framework */; };
+		AC2354FB90642B1B74C52607 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3F4873DA60E4F31B721ABC5 /* QuartzCore.framework */; };
+		BE24064972EACE231E9A736C /* NoorPrayerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2C22AC71D95464541469D4 /* NoorPrayerAttributes.swift */; };
+		C778F8AF234BA02CED09C3C3 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D04375EC03D8B44A7FBBED96 /* Metal.framework */; };
+		CB828B5C5374A16DF794D32C /* NoorPrayerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2C22AC71D95464541469D4 /* NoorPrayerAttributes.swift */; };
+		DA1A004923765022CE601720 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 928BB353968CA4CE4C607F86 /* CoreGraphics.framework */; };
+		DD9EA0F81DDA224E7F3727B1 /* NoorWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 010A42699704DBAC0C8942ED /* NoorWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E5AE35D1CE5854A3E07075DE /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E03BEB33B44BA0CC45795D44 /* WebKit.framework */; };
+		F9D0E89073F4A1CAE8A4D537 /* NoorMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54007A44C83CD6AEE890E8D /* NoorMotion.swift */; };
+		FD6F8B70D8AEF1EC1F19E0A8 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E41C68F181D0DB4B8ECC3C7F /* ActivityKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AC3E6555B6C89CE6A769A581 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29D9CC74CD675CF24783DB6F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8FF0E3EE42143ABF0F936DDC;
+			remoteInfo = NoorWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1D9D3482836E5B0417B17F9B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DD9EA0F81DDA224E7F3727B1 /* NoorWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		010A42699704DBAC0C8942ED /* NoorWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NoorWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		049D61929C33F4BFAC2C8F37 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		058D3A59F616D62AD6F2D3A6 /* notes.rs */ = {isa = PBXFileReference; path = notes.rs; sourceTree = "<group>"; };
+		0DAC298B6D3EB16C9EEE9613 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		1A197E4378CB5BEF8ECD4FF9 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
+		1BB6ED061B055F7A3B683F64 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = SOURCE_ROOT; };
+		1F104D6A072461C84D042DD4 /* prayer_cmds.rs */ = {isa = PBXFileReference; path = prayer_cmds.rs; sourceTree = "<group>"; };
+		241463D1A02E8DAA15F44BA4 /* lib.rs */ = {isa = PBXFileReference; path = lib.rs; sourceTree = "<group>"; };
+		2D2C22AC71D95464541469D4 /* NoorPrayerAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorPrayerAttributes.swift; sourceTree = "<group>"; };
+		2FC68EF7877FB5E573749D63 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		3B503922A668AFABB24538BA /* ios_live.rs */ = {isa = PBXFileReference; path = ios_live.rs; sourceTree = "<group>"; };
+		3D45FF8D0AA8E3609BA60FDB /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
+		3DC7CE7AFFEEA6E471D3D637 /* creative.rs */ = {isa = PBXFileReference; path = creative.rs; sourceTree = "<group>"; };
+		448450ECD462E82FF1E4CE73 /* ios_share.rs */ = {isa = PBXFileReference; path = ios_share.rs; sourceTree = "<group>"; };
+		47D71041E58386C52DDEF8A0 /* state.rs */ = {isa = PBXFileReference; path = state.rs; sourceTree = "<group>"; };
+		628B8A2B18897A2F92BE1B04 /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
+		63A7DEEAC7089E2C7F318996 /* NoorPrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorPrayerLiveActivity.swift; sourceTree = "<group>"; };
+		68EA840AC502F7F6D27E00EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		741F0214F2A9A74637790732 /* NoorWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorWidgetBundle.swift; sourceTree = "<group>"; };
+		779D94687C58F140A22FBCCD /* macos.rs */ = {isa = PBXFileReference; path = macos.rs; sourceTree = "<group>"; };
+		796330516B5C8621867C212D /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
+		7D3285F441E18CE72E4638FE /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		869886145B1EBE59E124DB36 /* widgets_cmds.rs */ = {isa = PBXFileReference; path = widgets_cmds.rs; sourceTree = "<group>"; };
+		928BB353968CA4CE4C607F86 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		92EFE182D73AE39CDD6E9D3A /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		9DFAD2F4975A6CEA5930E9C8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A520BA1737A53C9D77DA3CC0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		A54007A44C83CD6AEE890E8D /* NoorMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorMotion.swift; sourceTree = "<group>"; };
+		A7C729DAECBF9777223F48F2 /* NoorLive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorLive.swift; sourceTree = "<group>"; };
+		B3E5F6DA7BC1427080221930 /* notify.rs */ = {isa = PBXFileReference; path = notify.rs; sourceTree = "<group>"; };
+		BEF300F782773EB679A39992 /* scroll.rs */ = {isa = PBXFileReference; path = scroll.rs; sourceTree = "<group>"; };
+		C3F4873DA60E4F31B721ABC5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		CAE57ADB115E590E6A4342A9 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		D04375EC03D8B44A7FBBED96 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		D0CD839B3163C3AF145E018B /* noor.rs */ = {isa = PBXFileReference; path = noor.rs; sourceTree = "<group>"; };
+		D5BD334E7E0B25E9EA1CDEE5 /* island_state.rs */ = {isa = PBXFileReference; path = island_state.rs; sourceTree = "<group>"; };
+		DE8F18F4F5389B5669214304 /* ios_motion.rs */ = {isa = PBXFileReference; path = ios_motion.rs; sourceTree = "<group>"; };
+		E03BEB33B44BA0CC45795D44 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		E41C68F181D0DB4B8ECC3C7F /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
+		E41F9CEAA4982FCE08F9A657 /* app.rs */ = {isa = PBXFileReference; path = app.rs; sourceTree = "<group>"; };
+		E6EDA2BC2A4FAFB18D949081 /* backup.rs */ = {isa = PBXFileReference; path = backup.rs; sourceTree = "<group>"; };
+		EB015FE062588C26027EC611 /* noor_iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = noor_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBBC5E904F4728CED9505FA5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		ECB73F028F85A2CCC751AF5A /* images.rs */ = {isa = PBXFileReference; path = images.rs; sourceTree = "<group>"; };
+		F213377FFEB01875D3C58972 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F3DBF56963C8600F81FB7981 /* mod.rs */ = {isa = PBXFileReference; path = mod.rs; sourceTree = "<group>"; };
+		F6C8300B9B983963F2149767 /* settings.rs */ = {isa = PBXFileReference; path = settings.rs; sourceTree = "<group>"; };
+		FD175F0E4D46C7073908D3F9 /* noor_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = noor_iOS.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5F2A9C4C770CB3C938EB69B5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9EEC61FBE60FDADD7E3195A3 /* libapp.a in Frameworks */,
+				DA1A004923765022CE601720 /* CoreGraphics.framework in Frameworks */,
+				C778F8AF234BA02CED09C3C3 /* Metal.framework in Frameworks */,
+				A34C8124FB3EE0D8D5637483 /* MetalKit.framework in Frameworks */,
+				AC2354FB90642B1B74C52607 /* QuartzCore.framework in Frameworks */,
+				0F662A19A293349794C5043D /* Security.framework in Frameworks */,
+				1357A5DBABC525E13967E932 /* UIKit.framework in Frameworks */,
+				E5AE35D1CE5854A3E07075DE /* WebKit.framework in Frameworks */,
+				89C36D15D4B21302B1080138 /* ActivityKit.framework in Frameworks */,
+				30C069D05C780B7D3A5136A0 /* CoreMotion.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		849BE51659B6CE1D13B42EB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95A1C4A51884D132B0FD5801 /* WidgetKit.framework in Frameworks */,
+				A12B5B8703419182D2074407 /* SwiftUI.framework in Frameworks */,
+				FD6F8B70D8AEF1EC1F19E0A8 /* ActivityKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		10F29DDA4B35BB49FBF2192A /* noor */ = {
+			isa = PBXGroup;
+			children = (
+				CAE57ADB115E590E6A4342A9 /* main.mm */,
+				A7C729DAECBF9777223F48F2 /* NoorLive.swift */,
+				A54007A44C83CD6AEE890E8D /* NoorMotion.swift */,
+				3D60D5DEFEBE85F1C1C1541D /* bindings */,
+			);
+			path = noor;
+			sourceTree = "<group>";
+		};
+		1AC4915E10AE8C4CF51BEBCB /* scroll */ = {
+			isa = PBXGroup;
+			children = (
+				779D94687C58F140A22FBCCD /* macos.rs */,
+				F3DBF56963C8600F81FB7981 /* mod.rs */,
+			);
+			path = scroll;
+			sourceTree = "<group>";
+		};
+		3D60D5DEFEBE85F1C1C1541D /* bindings */ = {
+			isa = PBXGroup;
+			children = (
+				3D45FF8D0AA8E3609BA60FDB /* bindings.h */,
+			);
+			path = bindings;
+			sourceTree = "<group>";
+		};
+		43452D6AE0F308AD10683A7D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				E6EDA2BC2A4FAFB18D949081 /* backup.rs */,
+				3B503922A668AFABB24538BA /* ios_live.rs */,
+				DE8F18F4F5389B5669214304 /* ios_motion.rs */,
+				448450ECD462E82FF1E4CE73 /* ios_share.rs */,
+				D5BD334E7E0B25E9EA1CDEE5 /* island_state.rs */,
+				241463D1A02E8DAA15F44BA4 /* lib.rs */,
+				628B8A2B18897A2F92BE1B04 /* main.rs */,
+				D0CD839B3163C3AF145E018B /* noor.rs */,
+				058D3A59F616D62AD6F2D3A6 /* notes.rs */,
+				B3E5F6DA7BC1427080221930 /* notify.rs */,
+				1F104D6A072461C84D042DD4 /* prayer_cmds.rs */,
+				F6C8300B9B983963F2149767 /* settings.rs */,
+				47D71041E58386C52DDEF8A0 /* state.rs */,
+				869886145B1EBE59E124DB36 /* widgets_cmds.rs */,
+				903AD8AF3670246FE7C08D93 /* commands */,
+				1AC4915E10AE8C4CF51BEBCB /* scroll */,
+			);
+			name = src;
+			path = ../../src;
+			sourceTree = "<group>";
+		};
+		8F0D1AFF339BBF9632096150 = {
+			isa = PBXGroup;
+			children = (
+				1BB6ED061B055F7A3B683F64 /* assets */,
+				68EA840AC502F7F6D27E00EA /* Assets.xcassets */,
+				EBBC5E904F4728CED9505FA5 /* LaunchScreen.storyboard */,
+				B2D020F82908D692440A27C9 /* Externals */,
+				E22F1282FABDD52DBF3B9A00 /* noor_iOS */,
+				F8B3997F868646ED72E0C11C /* NoorWidget */,
+				E8A070C89A2D6DB36ACC83AC /* Shared */,
+				AC9E8C262D2CA466676DB3E8 /* Sources */,
+				43452D6AE0F308AD10683A7D /* src */,
+				F6AFB5AB9794751478A298EB /* Frameworks */,
+				FA0D1FCAA48F4DAE1C266713 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		903AD8AF3670246FE7C08D93 /* commands */ = {
+			isa = PBXGroup;
+			children = (
+				E41F9CEAA4982FCE08F9A657 /* app.rs */,
+				3DC7CE7AFFEEA6E471D3D637 /* creative.rs */,
+				ECB73F028F85A2CCC751AF5A /* images.rs */,
+				92EFE182D73AE39CDD6E9D3A /* mod.rs */,
+				BEF300F782773EB679A39992 /* scroll.rs */,
+			);
+			path = commands;
+			sourceTree = "<group>";
+		};
+		AC9E8C262D2CA466676DB3E8 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				10F29DDA4B35BB49FBF2192A /* noor */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		B2D020F82908D692440A27C9 /* Externals */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Externals;
+			sourceTree = "<group>";
+		};
+		E22F1282FABDD52DBF3B9A00 /* noor_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				9DFAD2F4975A6CEA5930E9C8 /* Info.plist */,
+				FD175F0E4D46C7073908D3F9 /* noor_iOS.entitlements */,
+			);
+			path = noor_iOS;
+			sourceTree = "<group>";
+		};
+		E8A070C89A2D6DB36ACC83AC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				2D2C22AC71D95464541469D4 /* NoorPrayerAttributes.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		F6AFB5AB9794751478A298EB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E41C68F181D0DB4B8ECC3C7F /* ActivityKit.framework */,
+				928BB353968CA4CE4C607F86 /* CoreGraphics.framework */,
+				796330516B5C8621867C212D /* CoreMotion.framework */,
+				1A197E4378CB5BEF8ECD4FF9 /* libapp.a */,
+				D04375EC03D8B44A7FBBED96 /* Metal.framework */,
+				0DAC298B6D3EB16C9EEE9613 /* MetalKit.framework */,
+				C3F4873DA60E4F31B721ABC5 /* QuartzCore.framework */,
+				049D61929C33F4BFAC2C8F37 /* Security.framework */,
+				2FC68EF7877FB5E573749D63 /* SwiftUI.framework */,
+				7D3285F441E18CE72E4638FE /* UIKit.framework */,
+				E03BEB33B44BA0CC45795D44 /* WebKit.framework */,
+				A520BA1737A53C9D77DA3CC0 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F8B3997F868646ED72E0C11C /* NoorWidget */ = {
+			isa = PBXGroup;
+			children = (
+				F213377FFEB01875D3C58972 /* Info.plist */,
+				63A7DEEAC7089E2C7F318996 /* NoorPrayerLiveActivity.swift */,
+				741F0214F2A9A74637790732 /* NoorWidgetBundle.swift */,
+			);
+			path = NoorWidget;
+			sourceTree = "<group>";
+		};
+		FA0D1FCAA48F4DAE1C266713 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EB015FE062588C26027EC611 /* noor_iOS.app */,
+				010A42699704DBAC0C8942ED /* NoorWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		"TEMP_937AFCF0-546B-4160-A1F9-0AF2C5AB68FB" /* arm64 */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = arm64;
+			sourceTree = "<group>";
+		};
+		"TEMP_E2B10E50-97C7-4F10-A0FB-EB39296EA0A7" /* x86_64 */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = x86_64;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5B5BCD254F32EB987CA8A65D /* noor_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 178FD9C3D6FC897E9FAEF8AC /* Build configuration list for PBXNativeTarget "noor_iOS" */;
+			buildPhases = (
+				70C2D405BE36625B99D1FF4B /* Build Rust Code */,
+				C286ECF16B044D73463627CA /* Sources */,
+				1F833B4B2B086D95DBD55864 /* Resources */,
+				5F2A9C4C770CB3C938EB69B5 /* Frameworks */,
+				1D9D3482836E5B0417B17F9B /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3D523C84AE65A1F3C7E1E010 /* PBXTargetDependency */,
+			);
+			name = noor_iOS;
+			packageProductDependencies = (
+			);
+			productName = noor_iOS;
+			productReference = EB015FE062588C26027EC611 /* noor_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8FF0E3EE42143ABF0F936DDC /* NoorWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4F9AFB421B50D17B24E5915 /* Build configuration list for PBXNativeTarget "NoorWidget" */;
+			buildPhases = (
+				6B8494627A4D7F97B783342F /* Sources */,
+				849BE51659B6CE1D13B42EB5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NoorWidget;
+			packageProductDependencies = (
+			);
+			productName = NoorWidget;
+			productReference = 010A42699704DBAC0C8942ED /* NoorWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29D9CC74CD675CF24783DB6F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					5B5BCD254F32EB987CA8A65D = {
+						DevelopmentTeam = D2348BYS8R;
+						ProvisioningStyle = Automatic;
+					};
+					8FF0E3EE42143ABF0F936DDC = {
+						DevelopmentTeam = D2348BYS8R;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 8AB0A54F12A796049ED5AFC8 /* Build configuration list for PBXProject "noor" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8F0D1AFF339BBF9632096150;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FA0D1FCAA48F4DAE1C266713 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5B5BCD254F32EB987CA8A65D /* noor_iOS */,
+				8FF0E3EE42143ABF0F936DDC /* NoorWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1F833B4B2B086D95DBD55864 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FD97AB41A9EE08D066A2343 /* Assets.xcassets in Resources */,
+				8DE371B22F3B51135C4960FE /* LaunchScreen.storyboard in Resources */,
+				218AC38221059623C7E94CC5 /* assets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		70C2D405BE36625B99D1FF4B /* Build Rust Code */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Rust Code";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Externals/x86_64/${CONFIGURATION}/libapp.a",
+				"$(SRCROOT)/Externals/arm64/${CONFIGURATION}/libapp.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "npm run -- tauri ios xcode-script -v --platform \"${PLATFORM_DISPLAY_NAME:?}\" --sdk-root \"${SDKROOT:?}\" --framework-search-paths \"${FRAMEWORK_SEARCH_PATHS:?}\" --header-search-paths \"${HEADER_SEARCH_PATHS:?}\" --gcc-preprocessor-definitions \"${GCC_PREPROCESSOR_DEFINITIONS:-}\" --configuration \"${CONFIGURATION:?}\" ${FORCE_COLOR} ${ARCHS:?}\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6B8494627A4D7F97B783342F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CB828B5C5374A16DF794D32C /* NoorPrayerAttributes.swift in Sources */,
+				7E5F0698EEA7E41185750B92 /* NoorPrayerLiveActivity.swift in Sources */,
+				0213A8F2F9CAB0B7F55A5C27 /* NoorWidgetBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C286ECF16B044D73463627CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				12F32B11C8C0EE25C4982BD6 /* NoorLive.swift in Sources */,
+				F9D0E89073F4A1CAE8A4D537 /* NoorMotion.swift in Sources */,
+				BE24064972EACE231E9A736C /* NoorPrayerAttributes.swift in Sources */,
+				38873266F66E0B63B97315D2 /* main.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3D523C84AE65A1F3C7E1E010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8FF0E3EE42143ABF0F936DDC /* NoorWidget */;
+			targetProxy = AC3E6555B6C89CE6A769A581 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		051345F730F4B51B838DB453 /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D2348BYS8R;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				INFOPLIST_FILE = NoorWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nazmul.noor.widget;
+				PRODUCT_NAME = NoorWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = debug;
+		};
+		094D4A9FE5CF662227F24F67 /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D2348BYS8R;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				INFOPLIST_FILE = NoorWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nazmul.noor.widget;
+				PRODUCT_NAME = NoorWidget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = release;
+		};
+		3B2D7D53650AD46512306F4B /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = release;
+		};
+		40570B717A52D91A8D67E16F /* release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = noor_iOS/noor_iOS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D2348BYS8R;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = noor_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME) $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME) $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nazmul.noor;
+				PRODUCT_NAME = "Noor";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = arm64;
+			};
+			name = release;
+		};
+		96A25D5ABD028F11FE4A19FD /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = debug;
+		};
+		FCB43B9E4CD20932CD7C4EA2 /* debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ARCHS = (
+					arm64,
+				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = noor_iOS/noor_iOS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = D2348BYS8R;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\".\"",
+				);
+				INFOPLIST_FILE = noor_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[arch=arm64]" = "$(inherited) $(PROJECT_DIR)/Externals/arm64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME) $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				"LIBRARY_SEARCH_PATHS[arch=x86_64]" = "$(inherited) $(PROJECT_DIR)/Externals/x86_64/$(CONFIGURATION) $(SDKROOT)/usr/lib/swift $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM_NAME) $(DEVELOPER_DIR)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nazmul.noor;
+				PRODUCT_NAME = "Noor";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = arm64;
+			};
+			name = debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		178FD9C3D6FC897E9FAEF8AC /* Build configuration list for PBXNativeTarget "noor_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCB43B9E4CD20932CD7C4EA2 /* debug */,
+				40570B717A52D91A8D67E16F /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+		8AB0A54F12A796049ED5AFC8 /* Build configuration list for PBXProject "noor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96A25D5ABD028F11FE4A19FD /* debug */,
+				3B2D7D53650AD46512306F4B /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+		D4F9AFB421B50D17B24E5915 /* Build configuration list for PBXNativeTarget "NoorWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				051345F730F4B51B838DB453 /* debug */,
+				094D4A9FE5CF662227F24F67 /* release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29D9CC74CD675CF24783DB6F /* Project object */;
+}

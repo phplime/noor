@@ -1,0 +1,38 @@
+{
+  "$schema": "../gen/schemas/mobile-schema.json",
+  "identifier": "default",
+  "description": "Permissions for Noor's single window. All file reading and writing happens in Noor's own Rust commands, which validate paths; the webview gets no general filesystem access.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "opener:allow-reveal-item-in-dir",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://www.facebook.com/*"
+        },
+        {
+          "url": "https://www.linkedin.com/*"
+        },
+        {
+          "url": "https://codecanyon.net/*"
+        },
+        {
+          "url": "shareddocuments://*"
+        },
+        {
+          "url": "app-settings:*"
+        },
+        {
+          "url": "shortcuts:*"
+        }
+      ]
+    },
+    "notification:default"
+  ]
+}

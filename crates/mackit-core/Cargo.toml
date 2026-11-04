@@ -1,0 +1,21 @@
+[package]
+name = "mackit-core"
+version = "0.1.0"
+description = "MacKit image engine: decoding, geometry, transforms, watermarking, export and batch processing"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "bmp", "tiff", "gif", "rayon"] }
+fast_image_resize = { version = "5", features = ["image"] }
+ab_glyph = "0.2"
+webp = { version = "0.3", default-features = false }
+oxipng = { version = "9", default-features = false, features = ["parallel"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+base64 = "0.22"
+rayon = "1"
+
+[dev-dependencies]
+tempfile = "3"
+serde_json = "1"
