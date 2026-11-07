@@ -168,6 +168,13 @@ export function RamadanPage({ onBack }: { onBack: () => void }) {
             <div className="n-card n-stackcard">
               <Pick label="Wake-up alert" hint="Before Sehri ends" value={s.wakeBeforeMin} options={WAKE} onChange={(n) => void save({ wakeBeforeMin: n })} />
               <Pick label="“Sehri ends soon” alert" hint="Before Sehri ends" value={s.sehriWarningMin} options={WARN} onChange={(n) => void save({ sehriWarningMin: n })} />
+              <div className="n-switchrow">
+                <span>
+                  Alert when Sehri ends
+                  <small>The exact end time: your fast begins</small>
+                </span>
+                <Switch checked={s.sehriEndAlert ?? true} onChange={(v) => void save({ sehriEndAlert: v })} />
+              </div>
               <Pick label="Stop eating before Fajr" hint="A safety margin, if you prefer to stop early" value={s.sehriEndBeforeFajrMin} options={SAFE} zeroLabel="At Fajr" onChange={(n) => void save({ sehriEndBeforeFajrMin: n })} />
               <div className="n-field">
                 <span>Wake-up sound</span>

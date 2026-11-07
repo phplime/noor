@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { onAction } from '@tauri-apps/plugin-notification';
 import { AppProvider, useApp } from '../kit/app/AppContext';
 import { KitOverlays, ToolScreen } from '../kit/layouts/AppLayout';
@@ -7,22 +7,66 @@ import { noor, type Permission } from './api';
 import { Ctx, PRAYER_TABS, type NoorCtx, type PrayerTab, type Pushed, type RoutineTab, type Tab } from './context';
 import { NIcon, type NoorIconName } from './icons';
 import { HomeScreen } from './screens/Home';
-import { CalendarScreen } from './screens/Calendar';
-import { RamadanPage } from './screens/Ramadan';
-import { CalendarSettingsPage } from './screens/CalendarSettings';
-import { PrayerScreen } from './screens/Prayer';
-import { RoutineScreen } from './screens/Routine';
-import { ToolsScreen } from './screens/Tools';
-import { SettingsPage } from './screens/Settings';
-import { PrayerSettingsPage } from './screens/PrayerSettings';
-import { UpcomingPage } from './screens/Upcoming';
-import { AboutPage } from './screens/About';
-import { QuranPage } from './screens/Quran';
-import { Onboarding } from './screens/Onboarding';
+import { Guard } from './Guard';
+import { calmEnabled } from './optimize';
 import { LiveIsland } from './LiveIsland';
 import { useNoorTheme } from './theme';
 import { useLiveActivity } from './live';
 import { onAccent, resolveAccent } from './accent';
+
+// Startup speed: only Home is in the first bundle. Every other screen loads on demand,
+// and all of them are fetched quietly once Home is on screen so switching stays instant.
+const CalendarScreen = lazy(() => import('./screens/Calendar').then((m) => ({ default: m.CalendarScreen })));
+const RamadanPage = lazy(() => import('./screens/Ramadan').then((m) => ({ default: m.RamadanPage })));
+const CalendarSettingsPage = lazy(() =>
+  import('./screens/CalendarSettings').then((m) => ({
+    default: m.CalendarSettingsPage,
+  })),
+);
+const PrayerScreen = lazy(() => import('./screens/Prayer').then((m) => ({ default: m.PrayerScreen })));
+const RoutineScreen = lazy(() => import('./screens/Routine').then((m) => ({ default: m.RoutineScreen })));
+const ToolsScreen = lazy(() => import('./screens/Tools').then((m) => ({ default: m.ToolsScreen })));
+const SettingsPage = lazy(() => import('./screens/Settings').then((m) => ({ default: m.SettingsPage })));
+const PrayerSettingsPage = lazy(() =>
+  import('./screens/PrayerSettings').then((m) => ({
+    default: m.PrayerSettingsPage,
+  })),
+);
+const UpcomingPage = lazy(() => import('./screens/Upcoming').then((m) => ({ default: m.UpcomingPage })));
+const AboutPage = lazy(() => import('./screens/About').then((m) => ({ default: m.AboutPage })));
+const OptimizePage = lazy(() => import('./screens/Optimize').then((m) => ({ default: m.OptimizePage })));
+const VoicePage = lazy(() => import('./screens/VoicePage').then((m) => ({ default: m.VoicePage })));
+const QuranPage = lazy(() => import('./screens/Quran').then((m) => ({ default: m.QuranPage })));
+const Onboarding = lazy(() => import('./screens/Onboarding').then((m) => ({ default: m.Onboarding })));
+const SCREENS: (() => Promise<unknown>)[] = [
+  () => import('./screens/Calendar'),
+  () => import('./screens/Ramadan'),
+  () => import('./screens/CalendarSettings'),
+  () => import('./screens/Prayer'),
+  () => import('./screens/Routine'),
+  () => import('./screens/Tools'),
+  () => import('./screens/Settings'),
+  () => import('./screens/PrayerSettings'),
+  () => import('./screens/Upcoming'),
+  () => import('./screens/About'),
+  () => import('./screens/Optimize'),
+  () => import('./screens/VoicePage'),
+  () => import('./screens/Quran'),
+  () => import('./screens/Onboarding'),
+];
+let prefetched = false;
+function prefetchScreens() {
+  if (prefetched) return;
+  prefetched = true;
+  const run = () => SCREENS.forEach((load) => void load().catch(() => undefined));
+  const ric = (
+    window as unknown as {
+      requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void;
+    }
+  ).requestIdleCallback;
+  if (ric) ric(run, { timeout: 2500 });
+  else window.setTimeout(run, 1200);
+}
 
 // Prayer sits in the middle as the raised button.
 const TABS: { id: Tab; label: string; icon: NoorIconName; center?: boolean }[] = [
@@ -93,7 +137,10 @@ function Shell() {
   // Permission status + re-plan notifications on launch and whenever Noor returns to the foreground.
   useEffect(() => {
     const sync = () => {
-      void noor.permission(false).then(setPermission).catch(() => undefined);
+      void noor
+        .permission(false)
+        .then(setPermission)
+        .catch(() => undefined);
       void noor.refresh().catch(() => undefined);
     };
     sync();
@@ -107,8 +154,10 @@ function Shell() {
     const root = document.documentElement;
     let t: number | undefined;
     const wake = () => {
-      root.classList.remove('n-still');
       window.clearTimeout(t);
+      // Calm mode (Settings › Optimize): animations stay still all the time.
+      if (calmEnabled()) return void root.classList.add('n-still');
+      root.classList.remove('n-still');
       t = window.setTimeout(() => root.classList.add('n-still'), 8_000);
     };
     const opts = { passive: true, capture: true } as const;
@@ -116,7 +165,9 @@ function Shell() {
     window.addEventListener('pointerdown', wake, opts);
     window.addEventListener('scroll', wake, opts);
     window.addEventListener('keydown', wake, opts);
+    window.addEventListener('noor:calm', wake);
     return () => {
+      window.removeEventListener('noor:calm', wake);
       window.clearTimeout(t);
       window.removeEventListener('pointerdown', wake, opts);
       window.removeEventListener('scroll', wake, opts);
@@ -126,6 +177,9 @@ function Shell() {
 
   // Lock-screen prayer Live Activity (iPhone).
   useLiveActivity(snapshot);
+  useEffect(() => {
+    if (snapshot) prefetchScreens();
+  }, [snapshot]);
 
   // Tapping a notification opens the matching screen.
   useEffect(() => {
@@ -142,16 +196,17 @@ function Shell() {
       else if (r.startsWith('quran')) {
         go('today');
         push({ kind: 'quran', surah: Number(r.split(':')[1]) || undefined });
-      }
-      else if (r === 'ramadan') {
+      } else if (r === 'ramadan') {
         go('today');
         push({ kind: 'ramadan' });
-      }
-      else go('today');
+      } else go('today');
     };
     let unlisten: (() => void) | undefined;
     onAction((e: unknown) => {
-      const ev = e as { notification?: { extra?: Record<string, string> }; extra?: Record<string, string> };
+      const ev = e as {
+        notification?: { extra?: Record<string, string> };
+        extra?: Record<string, string>;
+      };
       route(ev?.notification?.extra?.route ?? ev?.extra?.route);
     })
       .then((l) => {
@@ -170,8 +225,39 @@ function Shell() {
   }, [accent]);
 
   const ctx = useMemo<NoorCtx>(
-    () => ({ snapshot, prayerError: error, reloadPrayer: reload, tab, routineTab, prayerTab, setPrayerTab, go, push, permission, askPermission, theme, scheme, setTheme, flash }),
-    [snapshot, error, reload, tab, routineTab, prayerTab, go, push, permission, askPermission, theme, scheme, setTheme, flash],
+    () => ({
+      snapshot,
+      prayerError: error,
+      reloadPrayer: reload,
+      tab,
+      routineTab,
+      prayerTab,
+      setPrayerTab,
+      go,
+      push,
+      permission,
+      askPermission,
+      theme,
+      scheme,
+      setTheme,
+      flash,
+    }),
+    [
+      snapshot,
+      error,
+      reload,
+      tab,
+      routineTab,
+      prayerTab,
+      go,
+      push,
+      permission,
+      askPermission,
+      theme,
+      scheme,
+      setTheme,
+      flash,
+    ],
   );
 
   const top = stack[stack.length - 1];
@@ -189,11 +275,15 @@ function Shell() {
         <div className={`n-tabs-host ${top ? 'is-covered' : ''}`}>
           <div className="n-statusfade" aria-hidden="true" />
           <div className="n-scroll" ref={scroller}>
-            {tab === 'today' && <HomeScreen />}
-            {tab === 'prayer' && <PrayerScreen />}
-            {tab === 'calendar' && <CalendarScreen />}
-            {tab === 'routine' && <RoutineScreen tab={routineTab} onTab={setRoutineTab} />}
-            {tab === 'tools' && <ToolsScreen />}
+            <Guard name={`tab:${tab}`} resetKey={`${tab}:${routineTab}`}>
+              <Suspense fallback={<div className="n-lazy" />}>
+                {tab === 'today' && <HomeScreen />}
+                {tab === 'prayer' && <PrayerScreen />}
+                {tab === 'calendar' && <CalendarScreen />}
+                {tab === 'routine' && <RoutineScreen tab={routineTab} onTab={setRoutineTab} />}
+                {tab === 'tools' && <ToolsScreen />}
+              </Suspense>
+            </Guard>
           </div>
           <div className="n-island-fade" aria-hidden="true" />
           <LiveIsland />
@@ -221,34 +311,44 @@ function Shell() {
 
         {top && (
           <div className="n-pushed" key={stack.length}>
-            {top.kind === 'tool' && (
-              <div className="kit-scope n-kit">
-                <ToolScreen toolId={top.id} onBack={pop} />
-              </div>
-            )}
-            {top.kind === 'prayer-settings' && <PrayerSettingsPage section={top.section} onBack={pop} />}
-            {top.kind === 'upcoming' && <UpcomingPage onBack={pop} />}
-            {top.kind === 'settings' && <SettingsPage onBack={pop} />}
-            {top.kind === 'ramadan' && <RamadanPage onBack={pop} />}
-            {top.kind === 'calendar-settings' && <CalendarSettingsPage onBack={pop} />}
-            {top.kind === 'about' && <AboutPage onBack={pop} />}
-            {top.kind === 'quran' && <QuranPage key={`${top.surah}:${top.ayah}`} surah={top.surah} ayah={top.ayah} onBack={pop} />}
+            <Guard name={`page:${top.kind}`} resetKey={stack.length} onBack={pop}>
+              <Suspense fallback={<div className="n-lazy" />}>
+                {top.kind === 'tool' && (
+                  <div className="kit-scope n-kit">
+                    <ToolScreen toolId={top.id} onBack={pop} />
+                  </div>
+                )}
+                {top.kind === 'prayer-settings' && <PrayerSettingsPage section={top.section} onBack={pop} />}
+                {top.kind === 'upcoming' && <UpcomingPage onBack={pop} />}
+                {top.kind === 'settings' && <SettingsPage onBack={pop} />}
+                {top.kind === 'ramadan' && <RamadanPage onBack={pop} />}
+                {top.kind === 'calendar-settings' && <CalendarSettingsPage onBack={pop} />}
+                {top.kind === 'about' && <AboutPage onBack={pop} />}
+                {top.kind === 'optimize' && <OptimizePage onBack={pop} />}
+                {top.kind === 'voice' && <VoicePage onBack={pop} />}
+                {top.kind === 'quran' && (
+                  <QuranPage key={`${top.surah}:${top.ayah}`} surah={top.surah} ayah={top.ayah} onBack={pop} />
+                )}
+              </Suspense>
+            </Guard>
           </div>
         )}
 
         {toast && <div className="n-toast">{toast}</div>}
 
         {!onboarded && (
-          <Onboarding
-            onDone={() => {
-              try {
-                localStorage.setItem(ONBOARD_KEY, '1');
-              } catch {
-                /* ignore */
-              }
-              setOnboarded(true);
-            }}
-          />
+          <Suspense fallback={null}>
+            <Onboarding
+              onDone={() => {
+                try {
+                  localStorage.setItem(ONBOARD_KEY, '1');
+                } catch {
+                  /* ignore */
+                }
+                setOnboarded(true);
+              }}
+            />
+          </Suspense>
         )}
 
         <div className="kit-scope n-kit-overlays">

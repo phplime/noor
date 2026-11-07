@@ -4,6 +4,8 @@ import { useNow } from '../../../island/lib/hooks';
 import { noor, toLocalInput } from '../../api';
 import { toBn } from '../../calendar';
 import { useNoor } from '../../context';
+import { DUAS_EN } from '../../duas_en';
+import { isEn, useLang } from '../../lang';
 import { AMAL, TIME_LABEL, amalForToday, countKey, duasFor, loadProgress, saveProgress, suggestedTime, type Dua, type DuaProgress, type DuaTime } from '../../duas';
 import { NIcon } from '../../icons';
 
@@ -30,6 +32,7 @@ const REMIND: Partial<Record<DuaTime, { h: number; m: number; title: string }>> 
 export function DuasView() {
   const { snapshot, flash, permission, askPermission } = useNoor();
   const now = useNow(60_000);
+  const en = isEn(useLang());
   const [p, setP] = useState<DuaProgress>(loadProgress);
   const auto = useMemo<DuaTime>(() => {
     const list = snapshot?.today.entries.map((e) => ({ prayer: e.prayer, time: Date.parse(e.time) })) ?? [];
@@ -104,7 +107,7 @@ export function DuasView() {
             </div>
             <div className="n-dua__tools">
               <button className={`n-chip ${showSay ? 'is-on' : ''}`} onClick={() => setShowSay((v) => !v)}>
-                উচ্চারণ {showSay ? 'লুকান' : 'দেখান'}
+                {en ? `${showSay ? 'Hide' : 'Show'} pronunciation` : `উচ্চারণ ${showSay ? 'লুকান' : 'দেখান'}`}
               </button>
               {REMIND[tab] && (
                 <button className="n-chip" onClick={() => void remind(tab)}>
@@ -117,35 +120,38 @@ export function DuasView() {
           {list.map((d) => {
             const n = p.counts[countKey(tab, d.id)] ?? 0;
             const ok = n >= d.count;
+            const E = en ? DUAS_EN[d.id] : undefined;
+            const L = E ? 'en' : 'bn';
+            const num = (x: number) => (E ? String(x) : toBn(x));
             return (
               <article key={d.id} className={`n-dua ${ok ? 'is-done' : ''}`}>
                 <header className="n-dua__head">
-                  <strong>{d.title}</strong>
-                  {tab !== 'surah' && <span className="n-dua__x">{d.count > 1 ? `${toBn(d.count)} বার` : '১ বার'}</span>}
+                  <strong lang={L}>{E?.title ?? d.title}</strong>
+                  {tab !== 'surah' && <span className="n-dua__x">{E ? `${d.count}×` : d.count > 1 ? `${toBn(d.count)} বার` : '১ বার'}</span>}
                 </header>
                 <p className="n-dua__ar" lang="ar" dir="rtl">
                   {d.ar}
                 </p>
-                {showSay && d.bnSay && (
-                  <p className="n-dua__say" lang="bn">
-                    <b>উচ্চারণ:</b> {d.bnSay}
+                {showSay && (E ? E.say : d.bnSay) && (
+                  <p className="n-dua__say" lang={L}>
+                    <b>{E ? 'Say:' : 'উচ্চারণ:'}</b> {E ? E.say : d.bnSay}
                   </p>
                 )}
-                <p className="n-dua__mean" lang="bn">
-                  <b>অর্থ:</b> {d.bnMeaning}
+                <p className="n-dua__mean" lang={L}>
+                  <b>{E ? 'Meaning:' : 'অর্থ:'}</b> {E ? E.meaning : d.bnMeaning}
                 </p>
-                <p className="n-dua__note" lang="bn">
-                  <NIcon name="sparkle" size={13} /> {d.note}
+                <p className="n-dua__note" lang={L}>
+                  <NIcon name="sparkle" size={13} /> {E ? E.note : d.note}
                 </p>
                 <footer className="n-dua__foot">
-                  <small>{d.source}</small>
+                  <small>{E ? E.source : d.source}</small>
                   {ok ? (
                     <button className="n-dua__btn is-done" onClick={() => undo(tab, d)}>
-                      <NIcon name="check" size={16} stroke={2.6} /> পড়েছি
+                      <NIcon name="check" size={16} stroke={2.6} /> {E ? 'Done' : 'পড়েছি'}
                     </button>
                   ) : (
                     <button className="n-dua__btn" onClick={() => bump(tab, d)}>
-                      {d.count > 1 ? `${toBn(n)}/${toBn(d.count)} · পড়লাম +১` : 'পড়েছি'}
+                      {d.count > 1 ? `${num(n)}/${num(d.count)} · ${E ? 'Read +1' : 'পড়লাম +১'}` : E ? 'Mark read' : 'পড়েছি'}
                     </button>
                   )}
                 </footer>

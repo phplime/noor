@@ -5,14 +5,16 @@ export interface SurahInfo {
   ar: string;
   en: string;
   bn: string;
+  /** English meaning of the surah name. */
+  enMeaning?: string;
   type: 'meccan' | 'medinan';
   ayahs: number;
 }
 
 export interface Surah {
   n: number;
-  /** [arabic, bangla meaning, bangla pronunciation] per ayah. */
-  v: [string, string, string?][];
+  /** [arabic, bangla meaning, bangla pronunciation, english meaning, english transliteration] per ayah. */
+  v: [string, string, string?, string?, string?][];
 }
 
 export interface DailyAyah {
@@ -22,6 +24,9 @@ export interface DailyAyah {
   bn: string;
   /** Bangla pronunciation. */
   tr?: string;
+  /** English meaning and transliteration. */
+  en?: string;
+  trEn?: string;
 }
 
 export interface QuranState {

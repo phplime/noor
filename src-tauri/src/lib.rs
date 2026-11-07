@@ -8,6 +8,11 @@ mod backup;
 mod commands;
 mod ios_live;
 mod ios_motion;
+mod ios_optimize;
+mod ios_voice;
+mod ios_alarm;
+mod voice;
+mod optimize;
 mod ios_share;
 mod island_state;
 pub mod notes;
@@ -62,6 +67,9 @@ pub fn run() {
             notify::install_sounds(&handle);
             notify::spawn(handle.clone(), rx);
             app.state::<IslandState>().refresh_scheduler();
+
+            // ----- iPhone: reload the page if iOS killed it in the background (black screen)
+            ios_voice::install_watchdog();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -73,6 +81,14 @@ pub fn run() {
             commands::app::reset_settings,
             commands::images::scan_inputs,
             commands::images::import_image,
+            optimize::optimize_device,
+            voice::voice_get,
+            voice::voice_save,
+            voice::voice_test,
+            optimize::optimize_junk_scan,
+            optimize::optimize_junk_clean,
+            optimize::optimize_photos_scan,
+            optimize::optimize_photos_delete,
             commands::images::thumbnail,
             commands::images::render_preview,
             commands::images::plan_operations,

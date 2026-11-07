@@ -6,6 +6,9 @@ import { NIcon } from '../icons';
 import { Avatar } from './home/ProfileSheet';
 import { NoorMark } from '../icons';
 import { Card, Page } from '../ui';
+import { useState } from 'react';
+import { clearErrors, readErrors } from '../Guard';
+import { useNoor } from '../context';
 
 export function AboutPage({ onBack }: { onBack: () => void }) {
   const { appInfo } = useApp();
@@ -52,8 +55,55 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
           <strong>Private by design</strong>
           <span>Everything is calculated and processed on your iPhone. No account, no tracking, no uploads. The only things fetched online are the weather on Home (your saved prayer location is sent to Open-Meteo) and map tiles in Places. Your data lives in the app’s own storage; edited photos are saved to Files › On My iPhone › Noor.</span>
         </Card>
-        <div className="n-muted n-small">Prayer-time formulas: PrayTimes.org (Hamid Zarrabi-Zadeh). City data: city-timezones (MIT). Fonts: DejaVu, Scheherazade New & Amiri Quran (OFL). Qur’an: Uthmani text (The Noble Qur’an Encyclopedia), Bangla meaning by Muhiuddin Khan (tanzil.net), via quran-json (CC-BY-SA 4.0). Weather: Open-Meteo.com (CC BY 4.0). Maps © OpenStreetMap.</div>
+        <ProblemLog />
+        <div className="n-muted n-small">Prayer-time formulas: PrayTimes.org (Hamid Zarrabi-Zadeh). City data: city-timezones (MIT). Fonts: DejaVu, Scheherazade New & Amiri Quran (OFL). Qur’an: Uthmani text (The Noble Qur’an Encyclopedia), Bangla meaning by Muhiuddin Khan (tanzil.net), English meaning Saheeh International, via quran-json (CC-BY-SA 4.0). Weather: Open-Meteo.com (CC BY 4.0). Maps © OpenStreetMap.</div>
       </div>
     </Page>
+  );
+}
+
+/** Errors the crash guard caught, so a freeze or blank screen can be traced. */
+function ProblemLog() {
+  const { flash } = useNoor();
+  const [list, setList] = useState(readErrors);
+  if (!list.length) return null;
+  const text = list.map((e) => `${e.at} [${e.where}] ${e.message}\n${e.stack ?? ''}`).join('\n\n');
+  return (
+    <Card className="n-stack n-about__card n-problems">
+      <strong>Recent problems ({list.length})</strong>
+      <span>Noor recovered from these. Copy and send them to fix the cause.</span>
+      <ul>
+        {list.slice(0, 5).map((e) => (
+          <li key={e.at + e.message}>
+            <small>
+              {new Date(e.at).toLocaleString()} · {e.where}
+            </small>
+            {e.message}
+          </li>
+        ))}
+      </ul>
+      <div className="n-row">
+        <button
+          className="n-chip"
+          onClick={() =>
+            void navigator.clipboard
+              ?.writeText(text)
+              .then(() => flash('Copied'))
+              .catch(() => flash('Could not copy'))
+          }
+        >
+          <NIcon name="list" size={14} /> Copy details
+        </button>
+        <button
+          className="n-chip"
+          onClick={() => {
+            clearErrors();
+            setList([]);
+          }}
+        >
+          <NIcon name="trash" size={14} /> Clear
+        </button>
+      </div>
+    </Card>
   );
 }

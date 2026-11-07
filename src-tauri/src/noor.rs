@@ -324,8 +324,13 @@ pub fn fitness_of(db: &nexa_widgets::WidgetDb) -> FitnessData {
 
 fn fitness_store(app: &AppHandle, state: &State<'_, AppState>, data: FitnessData) -> R<FitnessOverview> {
     let data = data.sanitized();
+    let profile_changed = { let db = db!(state); fitness_of(&db).profile != data.profile };
     db!(state).set_json("fitness", &data).map_err(e)?;
-    state.refresh_scheduler();
+    // Only the weigh-in reminder depends on fitness data, and it reads the profile alone:
+    // step and weight logs don't need the notifications re-planned.
+    if profile_changed {
+        state.refresh_scheduler();
+    }
     changed(app, "fitness");
     let today = Utc::now().with_timezone(&local_tz()).date_naive();
     Ok(FitnessOverview { summary: fitness::summary(&data, today), data })
@@ -364,10 +369,26 @@ pub fn fitness_set_steps(app: AppHandle, state: State<'_, AppState>, date: Strin
 /// Pull the last week's step counts from the iPhone's motion chip (no-op elsewhere).
 #[tauri::command]
 pub async fn fitness_sync_steps(app: AppHandle, state: State<'_, AppState>) -> R<FitnessOverview> {
-    let counts = crate::ios_motion::step_counts(7);
-    let mut data = { let db = db!(state); fitness_of(&db) };
+    // Reading the motion chip waits on iOS (up to a few seconds per day): do it on its own thread,
+    // and never twice at once, so it can't hold up other calls.
+    static BUSY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    let counts = if BUSY.swap(true, std::sync::atomic::Ordering::SeqCst) {
+        Vec::new()
+    } else {
+        let r = tauri::async_runtime::spawn_blocking(|| crate::ios_motion::step_counts(7)).await;
+        BUSY.store(false, std::sync::atomic::Ordering::SeqCst);
+        r.unwrap_or_default()
+    };
+    let before = { let db = db!(state); fitness_of(&db) };
+    let mut data = before.clone();
     for (date, steps) in counts {
         data.set_steps(&date, steps, "motion");
+    }
+    let data = data.sanitized();
+    // Battery: nothing new from the motion chip → no write, no event, no re-plan.
+    if data == before {
+        let today = Utc::now().with_timezone(&local_tz()).date_naive();
+        return Ok(FitnessOverview { summary: fitness::summary(&data, today), data });
     }
     fitness_store(&app, &state, data)
 }

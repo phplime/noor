@@ -34,6 +34,15 @@ pub struct Reminder {
     pub sound: String,
     pub color: String,
     pub created_at: i64,
+    /// Extra alerts this many minutes before each occurrence (largest first, up to 5).
+    #[serde(default)]
+    pub before: Vec<u32>,
+    /// Also alert at the exact time (on unless the user only wants the early alerts).
+    #[serde(default = "yes")]
+    pub exact: bool,
+    /// At the exact time, ring like an alarm until stopped (iPhone: AlarmKit, iOS 26+).
+    #[serde(default)]
+    pub alarm: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -53,6 +62,37 @@ pub struct ReminderInput {
     pub sound: String,
     #[serde(default)]
     pub color: String,
+    #[serde(default)]
+    pub before: Vec<u32>,
+    #[serde(default = "yes")]
+    pub exact: bool,
+    #[serde(default)]
+    pub alarm: bool,
+}
+
+/// Up to 5 distinct offsets, 1 minute to 7 days, largest first.
+pub fn clean_before(list: &[u32]) -> Vec<u32> {
+    let mut v: Vec<u32> = list.iter().copied().filter(|m| (1..=7 * 24 * 60).contains(m)).collect();
+    v.sort_unstable_by(|a, b| b.cmp(a));
+    v.dedup();
+    v.truncate(5);
+    v
+}
+
+/// "10 min", "1 h 30 min", "2 days" — for alert titles.
+pub fn before_label(min: u32) -> String {
+    let (d, h, m) = (min / 1440, (min % 1440) / 60, min % 60);
+    let mut parts = Vec::new();
+    if d > 0 {
+        parts.push(format!("{d} day{}", if d == 1 { "" } else { "s" }));
+    }
+    if h > 0 {
+        parts.push(format!("{h} h"));
+    }
+    if m > 0 {
+        parts.push(format!("{m} min"));
+    }
+    parts.join(" ")
 }
 
 fn yes() -> bool {
@@ -128,7 +168,7 @@ pub fn occurrences(r: &Reminder, tz: Tz, from: DateTime<Utc>, until: DateTime<Ut
 impl WidgetDb {
     pub fn reminders(&self) -> WidgetResult<Vec<Reminder>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, title, note, at, repeat, enabled, sound, color, created_at FROM custom_reminders ORDER BY at ASC",
+            "SELECT id, title, note, at, repeat, enabled, sound, color, created_at, before, exact, alarm FROM custom_reminders ORDER BY at ASC",
         )?;
         let rows = stmt.query_map([], |r| {
             let repeat: String = r.get(4)?;
@@ -142,6 +182,9 @@ impl WidgetDb {
                 sound: r.get(6)?,
                 color: r.get(7)?,
                 created_at: r.get(8)?,
+                before: r.get::<_, String>(9)?.split(',').filter_map(|x| x.trim().parse().ok()).collect(),
+                exact: r.get(10)?,
+                alarm: r.get(11)?,
             })
         })?;
         Ok(rows.collect::<Result<_, _>>()?)
@@ -168,14 +211,20 @@ impl WidgetDb {
             sound: if input.sound.trim().is_empty() { "default".into() } else { input.sound.trim().into() },
             color: if input.color.trim().is_empty() { "#7c9cff".into() } else { input.color.trim().chars().take(16).collect() },
             created_at: existing.map(|r| r.created_at).unwrap_or_else(crate::now_ms),
+            before: clean_before(&input.before),
+            // Never leave a reminder with no alert at all.
+            exact: input.exact || input.alarm || clean_before(&input.before).is_empty(),
+            alarm: input.alarm,
         };
+        let before = r.before.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(",");
         let repeat = serde_json::to_string(&r.repeat)?.trim_matches('"').to_string();
         self.conn.execute(
-            "INSERT INTO custom_reminders (id, title, note, at, repeat, enabled, sound, color, created_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+            "INSERT INTO custom_reminders (id, title, note, at, repeat, enabled, sound, color, created_at, before, exact, alarm)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
              ON CONFLICT(id) DO UPDATE SET title = excluded.title, note = excluded.note, at = excluded.at,
-               repeat = excluded.repeat, enabled = excluded.enabled, sound = excluded.sound, color = excluded.color",
-            params![r.id, r.title, r.note, r.at, repeat, r.enabled, r.sound, r.color, r.created_at],
+               repeat = excluded.repeat, enabled = excluded.enabled, sound = excluded.sound, color = excluded.color,
+               before = excluded.before, exact = excluded.exact, alarm = excluded.alarm",
+            params![r.id, r.title, r.note, r.at, repeat, r.enabled, r.sound, r.color, r.created_at, before, r.exact, r.alarm],
         )?;
         Ok(r)
     }
@@ -211,6 +260,9 @@ mod tests {
             sound: "default".into(),
             color: String::new(),
             created_at: 0,
+            before: vec![],
+            exact: true,
+            alarm: false,
         }
     }
 
@@ -252,9 +304,19 @@ mod tests {
                 enabled: true,
                 sound: String::new(),
                 color: String::new(),
+                before: vec![10, 30, 10, 0],
+                exact: false,
+                alarm: false,
             })
             .unwrap();
         assert_eq!(r.title, "Vitamins");
+        assert_eq!(r.before, vec![30, 10], "sorted, de-duplicated, zero dropped");
+        assert!(!r.exact);
+        let back = &db.reminders().unwrap()[0];
+        assert_eq!(back.before, vec![30, 10]);
+        assert!(!back.exact);
+        assert_eq!(before_label(90), "1 h 30 min");
+        assert_eq!(before_label(1440), "1 day");
         assert_eq!(db.reminders().unwrap()[0].repeat, Repeat::Daily);
         db.reminder_set_enabled(&r.id, false).unwrap();
         assert!(!db.reminders().unwrap()[0].enabled);

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNow } from '../../island/lib/hooks';
 import { findNext, formatTime } from '../../island/lib/time';
-import { PRAYER_NAMES } from '../../island/lib/types';
 import { formatMs, useWidgetData, w } from '../../island/lib/widgets';
 import { inLabel, noor, nextOccurrence, type PlannedNotification } from '../api';
 import { cal } from '../calendar';
@@ -21,6 +20,7 @@ import { PrayerArc } from './home/PrayerArc';
 import { FridayCard } from './home/FridayCard';
 import { AyahCard } from './home/AyahCard';
 import { ShortcutsCard } from './home/ShortcutsCard';
+import { prayerLabel, useLang } from '../lang';
 import { useWeather } from '../weather';
 import { SalahDot, SalahMarkSheet } from './SalahTracker';
 import { useSalah, type SalahPrayer, type SalahStatus } from '../salah';
@@ -38,6 +38,7 @@ const KIND_ICON: Record<string, NoorIconName> = {
 
 export function HomeScreen() {
   const { snapshot, go, push, permission, askPermission, prayerError } = useNoor();
+  const lang = useLang();
   const today = useToday();
   const [layout, setLayout] = useHomeLayout();
   const [editing, setEditing] = useState(false);
@@ -107,7 +108,7 @@ export function HomeScreen() {
                     className={`n-day__item ${isNext ? 'is-next' : ''} ${passed ? 'is-past' : ''}`}
                     onClick={() => (passed ? setMarking({ date: snapshot.today.date, prayer: e.prayer as SalahPrayer, status: salahToday.status(snapshot.today.date, e.prayer) }) : go('prayer'))}
                   >
-                    <span className="n-day__name">{PRAYER_NAMES[e.prayer]}</span>
+                    <span className="n-day__name">{prayerLabel(e.prayer, lang)}</span>
                     <span className="n-day__time">
                       {t.t}
                       {t.p && <small>{t.p}</small>}
@@ -122,7 +123,7 @@ export function HomeScreen() {
       </div>
     ),
 
-    shortcuts: <ShortcutsCard key="shortcuts" water={water ?? null} goal={goal} glass={glass} timer={timer ?? null} now={now} onOpen={(t) => go('routine', t)} />,
+    shortcuts: <ShortcutsCard key="shortcuts" water={water ?? null} goal={goal} glass={glass} timer={timer ?? null} now={now} onOpen={(t) => go('routine', t)} onOptimize={() => push({ kind: 'optimize' })} />,
 
     friday: new Date(`${today}T12:00:00`).getDay() === 5 ? <FridayCard key="friday" date={today} onKahf={() => push({ kind: 'quran', surah: 18 })} /> : null,
 

@@ -3,6 +3,8 @@ import { formatMs, w, type TimerState, type WaterToday } from '../../../island/l
 import type { PrayerTab, RoutineTab } from '../../context';
 import { NIcon } from '../../icons';
 import { DHIKR, loadTasbih, rollDay, saveTasbih, tap, targetOf, type TasbihState } from '../../tasbih';
+import { optimize, type DeviceHealth } from '../../optimize';
+import { isIOS } from '../../../kit/utils/platform';
 
 /** Three one-tap shortcuts at the top of Home: Tasbih, Water, Timer. */
 export function ShortcutsCard({
@@ -12,6 +14,7 @@ export function ShortcutsCard({
   timer,
   now,
   onOpen,
+  onOptimize,
 }: {
   water: WaterToday | null;
   goal: number;
@@ -19,7 +22,14 @@ export function ShortcutsCard({
   timer: TimerState | null;
   now: number;
   onOpen: (t: RoutineTab | PrayerTab) => void;
+  /** Settings › Optimize (iPhone only). */
+  onOptimize?: () => void;
 }) {
+  const showOpt = !!onOptimize && (isIOS() || !!import.meta.env.VITE_MOCK);
+  const [dev, setDev] = useState<DeviceHealth | null>(null);
+  useEffect(() => {
+    if (showOpt) void optimize.device().then(setDev).catch(() => undefined);
+  }, [showOpt]);
   const [t, setT] = useState<TasbihState>(() => rollDay(loadTasbih()));
   useEffect(() => {
     const on = () => setT(rollDay(loadTasbih()));
@@ -113,6 +123,23 @@ export function ShortcutsCard({
           <NIcon name={running ? 'pause' : 'play'} size={14} stroke={2.4} />
         </button>
       </div>
+
+      {showOpt && (
+        <div className="n-short n-short--opt" onClick={onOptimize} role="button" tabIndex={0}>
+          <span className="n-short__icon">
+            <NIcon name="flame" size={18} stroke={2} />
+          </span>
+          <span className="n-short__opttext">
+            <b>Optimize iPhone</b>
+            <span className="n-short__label">
+              {dev?.battery != null
+                ? `Battery ${Math.round(dev.battery * 100)}%${dev.free != null ? ` · ${(dev.free / 1e9).toFixed(1)} GB free` : ''}`
+                : 'Battery check · clean junk & duplicates'}
+            </span>
+          </span>
+          <NIcon name="chevronRight" size={18} className="n-short__chev" />
+        </div>
+      )}
     </div>
   );
 }

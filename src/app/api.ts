@@ -15,9 +15,16 @@ export interface Reminder {
   sound: string;
   color: string;
   createdAt: number;
+  /** Extra alerts this many minutes before (largest first). */
+  before: number[];
+  /** Alert at the exact time. */
+  exact: boolean;
+  /** Ring like an alarm at the exact time until stopped. */
+  alarm: boolean;
 }
 
-export type ReminderInput = Omit<Reminder, 'id' | 'createdAt'> & { id?: string };
+export type ReminderInput = Omit<Reminder, 'id' | 'createdAt' | 'before' | 'exact' | 'alarm'> &
+  Partial<Pick<Reminder, 'before' | 'exact' | 'alarm'>> & { id?: string };
 
 export interface PlannedNotification {
   kind: 'prayer' | 'ramadan' | 'special' | 'water' | 'timer' | 'reminder' | 'refresh' | 'test';

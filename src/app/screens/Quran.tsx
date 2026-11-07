@@ -1,3 +1,4 @@
+import { isEn, useLang } from '../lang';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNoor } from '../context';
 import { NIcon } from '../icons';
@@ -22,6 +23,7 @@ export function QuranHome() {
   const { list, error } = useIndex();
   const [q, setQ] = useState('');
   const [st, setSt] = useState<QuranState>(readState);
+  const enList = isEn(useLang());
   useEffect(() => {
     const on = () => setSt(readState());
     window.addEventListener('noor:quran', on);
@@ -94,7 +96,7 @@ export function QuranHome() {
             <span>
               <b>{s.en}</b>
               <small>
-                <span lang="bn">{s.bn}</span> · {s.ayahs} ayahs · {s.type === 'meccan' ? 'Makki' : 'Madani'}
+                {enList ? s.enMeaning ?? s.bn : <span lang="bn">{s.bn}</span>} · {s.ayahs} ayahs · {s.type === 'meccan' ? 'Makki' : 'Madani'}
               </small>
             </span>
             <em lang="ar">{s.ar}</em>
@@ -128,6 +130,7 @@ function SurahReader({ n, target, onBack }: { n: number; target?: number; onBack
   const info = list?.find((s) => s.n === n);
   const [data, setData] = useState<Surah | null>(null);
   const [st, setSt] = useState<QuranState>(readState);
+  const en = isEn(useLang());
   const [prefs, setPrefs] = useState(false);
   const body = useRef<HTMLDivElement>(null);
 
@@ -219,7 +222,7 @@ function SurahReader({ n, target, onBack }: { n: number; target?: number; onBack
             </span>
             <b>{info.en}</b>
             <small>
-              <span lang="bn">{info.bn}</span> · {info.ayahs} ayahs · {info.type === 'meccan' ? 'Makki · মাক্কী' : 'Madani · মাদানী'}
+              {en ? info.enMeaning ?? info.bn : <span lang="bn">{info.bn}</span>} · {info.ayahs} ayahs · {info.type === 'meccan' ? (en ? 'Makki' : 'Makki · মাক্কী') : en ? 'Madani' : 'Madani · মাদানী'}
             </small>
           </header>
         )}
@@ -229,8 +232,9 @@ function SurahReader({ n, target, onBack }: { n: number; target?: number; onBack
           </p>
         )}
         {!data && <p className="n-hint">Loading…</p>}
-        {data?.v.map(([ar, bn, tr], i) => {
+        {data?.v.map(([ar, bn, tr, enMean, enTr], i) => {
           const a = i + 1;
+          const E = en && !!enMean;
           return (
             <article key={a} id={`ayah-${a}`} data-ayah={a} className={`n-ayah ${target === a ? 'is-target' : ''} ${live && rs.ayah === a ? 'is-playing' : ''}`}>
               <div className="n-ayah__bar">
@@ -259,16 +263,16 @@ function SurahReader({ n, target, onBack }: { n: number; target?: number; onBack
               <p className="n-ayah__ar" lang="ar" dir="rtl">
                 {ar} <span className="n-ayah__end">{'۝'}{arNum(a)}</span>
               </p>
-              {st.showTr && tr && (
-                <p className="n-ayah__tr" lang="bn">
-                  <small>উচ্চারণ</small>
-                  {tr}
+              {st.showTr && (E ? enTr : tr) && (
+                <p className="n-ayah__tr" lang={E ? 'en' : 'bn'}>
+                  <small>{E ? 'Pronunciation' : 'উচ্চারণ'}</small>
+                  {E ? enTr : tr}
                 </p>
               )}
               {st.showBn && (
-                <p className="n-ayah__bn" lang="bn">
-                  <small>অর্থ</small>
-                  <span>{bnNum(a)}.</span> {bn}
+                <p className="n-ayah__bn" lang={E ? 'en' : 'bn'}>
+                  <small>{E ? 'Meaning' : 'অর্থ'}</small>
+                  <span>{E ? a : bnNum(a)}.</span> {E ? enMean : bn}
                 </p>
               )}
             </article>

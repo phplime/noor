@@ -21,6 +21,8 @@ pub struct RamadanSettings {
     pub wake_before_min: u32,
     /// "Sehri ends in N min" alert (0 = off).
     pub sehri_warning_min: u32,
+    /// Alert at the exact moment Sehri ends.
+    pub sehri_end_alert: bool,
     /// "Iftar in N min" alert (0 = off).
     pub iftar_headsup_min: u32,
     /// Alert at Iftar (Maghrib).
@@ -40,6 +42,7 @@ impl Default for RamadanSettings {
             sehri_end_before_fajr_min: 0,
             wake_before_min: 45,
             sehri_warning_min: 10,
+            sehri_end_alert: true,
             iftar_headsup_min: 15,
             iftar_alert: true,
             lean_prayer_alerts: true,
@@ -148,6 +151,15 @@ pub fn plan_alerts(s: &RamadanSettings, days: &[DayTimes], tz: Tz, use24: bool, 
                 sound: "noor_bell".into(),
             });
         }
+        if s.sehri_end_alert {
+            push(Alert {
+                kind: "sehri-end",
+                at: end,
+                title: "Sehri time is over 🌙".into(),
+                body: format!("Your fast begins · Fajr is at {}. Ramadan day {}.", fmt(d.fajr, tz, use24), d.day_no),
+                sound: "noor_bell".into(),
+            });
+        }
         if s.iftar_headsup_min > 0 {
             push(Alert {
                 kind: "headsup",
@@ -224,18 +236,19 @@ mod tests {
         let from = Utc.with_ymd_and_hms(2027, 2, 1, 0, 0, 0).unwrap();
         let until = from + Duration::days(30);
         let alerts = plan_alerts(&s, &[day(1), day(2)], tz, false, from, until);
-        assert_eq!(alerts.len(), 8);
+        assert_eq!(alerts.len(), 10);
         assert!(alerts.windows(2).all(|w| w[0].at <= w[1].at));
-        let kinds: Vec<_> = alerts.iter().take(4).map(|a| a.kind).collect();
-        assert_eq!(kinds, vec!["wake", "sehri", "headsup", "iftar"]);
-        // wake = Fajr − 0 − 45 min = 04:15 local; Sehri warning 04:50; iftar 17:30
+        let kinds: Vec<_> = alerts.iter().take(5).map(|a| a.kind).collect();
+        assert_eq!(kinds, vec!["wake", "sehri", "sehri-end", "headsup", "iftar"]);
+        // wake = Fajr − 0 − 45 min = 04:15 local; Sehri warning 04:50; Sehri ends 05:00; iftar 17:30
         let local = |a: &Alert| a.at.with_timezone(&tz).format("%H:%M").to_string();
         assert_eq!(local(&alerts[0]), "04:15");
         assert_eq!(local(&alerts[1]), "04:50");
-        assert_eq!(local(&alerts[2]), "17:15");
-        assert_eq!(local(&alerts[3]), "17:30");
+        assert_eq!(local(&alerts[2]), "05:00");
+        assert_eq!(local(&alerts[3]), "17:15");
+        assert_eq!(local(&alerts[4]), "17:30");
         assert_eq!(alerts[0].body, "Sehri ends at 5:00 AM · Ramadan day 1");
-        assert_eq!(alerts[3].body, "Break your fast — Maghrib is at 5:30 PM. Ramadan day 1 done.");
+        assert_eq!(alerts[4].body, "Break your fast — Maghrib is at 5:30 PM. Ramadan day 1 done.");
         assert_eq!(alerts[0].sound, "noor_dawn");
         // 24-hour clock
         assert!(plan_alerts(&s, &[day(1)], tz, true, from, until)[0].body.contains("05:00"));
@@ -246,7 +259,7 @@ mod tests {
         let tz: Tz = "Asia/Dhaka".parse().unwrap();
         let from = Utc.with_ymd_and_hms(2027, 2, 1, 0, 0, 0).unwrap();
         let until = from + Duration::days(30);
-        let mut s = RamadanSettings { wake_before_min: 0, sehri_warning_min: 0, iftar_headsup_min: 0, ..Default::default() };
+        let mut s = RamadanSettings { wake_before_min: 0, sehri_warning_min: 0, sehri_end_alert: false, iftar_headsup_min: 0, ..Default::default() };
         let alerts = plan_alerts(&s, &[day(1)], tz, false, from, until);
         assert_eq!(alerts.iter().map(|a| a.kind).collect::<Vec<_>>(), vec!["iftar"]);
         s.iftar_alert = false;

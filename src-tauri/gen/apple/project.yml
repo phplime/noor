@@ -62,6 +62,8 @@ targets:
         NSSupportsLiveActivities: true
         UIBackgroundModes: [audio]
         NSMotionUsageDescription: Noor counts your daily steps for the Fitness section. Step data stays on your iPhone.
+        NSAlarmKitUsageDescription: Noor rings reminders you mark as alarms at their exact time, until you press Stop.
+        NSPhotoLibraryUsageDescription: Noor's Optimize tool scans your photos for screenshots, large videos and duplicates. Nothing leaves your iPhone and nothing is deleted unless you choose it.
     entitlements:
       path: noor_iOS/noor_iOS.entitlements
     scheme:
@@ -95,6 +97,10 @@ targets:
       - sdk: ActivityKit.framework
         weak: true
       - sdk: CoreMotion.framework
+      - sdk: Photos.framework
+      - sdk: AVFoundation.framework
+      - sdk: AlarmKit.framework
+        weak: true
       - target: NoorWidget
         embed: true
     preBuildScripts:

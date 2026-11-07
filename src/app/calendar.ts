@@ -76,6 +76,8 @@ export interface RamadanSettings {
   sehriEndBeforeFajrMin: number;
   wakeBeforeMin: number;
   sehriWarningMin: number;
+  /** Alert at the exact moment Sehri ends. */
+  sehriEndAlert: boolean;
   iftarHeadsupMin: number;
   iftarAlert: boolean;
   leanPrayerAlerts: boolean;

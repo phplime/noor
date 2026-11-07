@@ -19,6 +19,8 @@ export type Pushed =
   | { kind: 'ramadan' }
   | { kind: 'calendar-settings' }
   | { kind: 'about' }
+  | { kind: 'optimize' }
+  | { kind: 'voice' }
   | { kind: 'quran'; surah?: number; ayah?: number };
 
 export interface NoorCtx {

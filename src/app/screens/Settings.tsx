@@ -22,11 +22,14 @@ import { HomeEditor } from './home/HomeEditor';
 import { BackupSection } from './BackupSection';
 import { liveEnabled, liveStepsEnabled, liveSupported, setLiveEnabled, setLiveStepsEnabled } from '../live';
 import { isIOS } from '../../kit/utils/platform';
+import { LANG_LABEL, useLang } from '../lang';
+import { getEmail, setEmail, useOwner } from '../owner';
 
 export function SettingsPage({ onBack }: { onBack: () => void }) {
   const { permission, askPermission, flash, push, snapshot, reloadPrayer, go, theme, setTheme } = useNoor();
   const [sounds, setSounds] = useState<SoundInfo[]>([]);
   const [layout, setLayout] = useHomeLayout();
+  const lang = useLang();
   const [homeEdit, setHomeEdit] = useState(false);
   const [live, setLive] = useState(liveEnabled);
   const [liveSteps, setLiveSteps] = useState(liveStepsEnabled);
@@ -94,6 +97,13 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
   return (
     <Page title="Settings" onBack={onBack}>
       <div className="n-pad-x">
+      <SectionTitle>Language</SectionTitle>
+      <List>
+        <ListRow icon="globe" title="Language & voice" detail={`${LANG_LABEL[lang]} · notification texts and spoken alerts`} onClick={() => push({ kind: 'voice' })} />
+      </List>
+
+      <AccountSection />
+
       <SectionTitle>Appearance</SectionTitle>
       <Card className="n-stack">
         <div className="n-themes" role="radiogroup" aria-label="Theme">
@@ -224,6 +234,15 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
         <ListRow icon="image" title="Saved files" detail="Files › On My iPhone › Noor" />
       </List>
 
+      {(isIOS() || import.meta.env.VITE_MOCK) && (
+        <>
+          <SectionTitle>iPhone</SectionTitle>
+          <List>
+            <ListRow icon="flame" title="Optimize" detail="Battery check, junk cleanup, duplicate photos" onClick={() => push({ kind: 'optimize' })} />
+          </List>
+        </>
+      )}
+
       <BackupSection />
 
       <SectionTitle>About</SectionTitle>
@@ -232,5 +251,60 @@ export function SettingsPage({ onBack }: { onBack: () => void }) {
       </List>
       </div>
     </Page>
+  );
+}
+
+// ---------- Account (email) & owner tools ----------
+
+function AccountSection() {
+  const [email, setE] = useState(getEmail);
+  const owner = useOwner();
+  const [guide, setGuide] = useState(false);
+  return (
+    <>
+      <SectionTitle>Account</SectionTitle>
+      <Card className="n-stack">
+        <label className="n-field">
+          <span>Email</span>
+          <input
+            className="n-input"
+            type="email"
+            inputMode="email"
+            autoCapitalize="off"
+            autoCorrect="off"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setE(e.target.value)}
+            onBlur={() => setEmail(email)}
+          />
+        </label>
+        <p className="n-hint">Stored only on this phone.{owner ? ' Owner tools unlocked.' : ''}</p>
+      </Card>
+      {owner && (
+        <>
+          <SectionTitle>Owner tools</SectionTitle>
+          <List>
+            <ListRow icon="wifi" title="Mobile data per app" detail="Choose which apps may use the carrier network" onClick={() => setGuide((v) => !v)} />
+          </List>
+          {guide && (
+            <Card className="n-stack n-owner__guide">
+              <p>
+                iPhone lets only its own Settings app switch mobile data per app, so Noor can't show or change that list. It takes a minute there:
+              </p>
+              <ol>
+                <li>
+                  Open <b>Settings › Mobile Service</b> (or <b>Cellular</b>).
+                </li>
+                <li>Scroll to the list of apps: each shows how much mobile data it used.</li>
+                <li>Turn the switch off for apps that should use Wi-Fi only.</li>
+                <li>
+                  For more savings: <b>Mobile Data Options › Low Data Mode</b>, and turn off <b>Wi-Fi Assist</b> at the bottom.
+                </li>
+              </ol>
+            </Card>
+          )}
+        </>
+      )}
+    </>
   );
 }

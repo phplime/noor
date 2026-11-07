@@ -140,6 +140,18 @@ impl WidgetDb {
                  COMMIT;",
             )?;
         }
+        if version < 6 {
+            // Reminders: extra alerts before the time ("30,10" minutes), whether the exact time alerts,
+            // and whether it rings like an alarm until stopped.
+            self.conn.execute_batch(
+                "BEGIN;
+                 ALTER TABLE custom_reminders ADD COLUMN before TEXT NOT NULL DEFAULT '';
+                 ALTER TABLE custom_reminders ADD COLUMN exact INTEGER NOT NULL DEFAULT 1;
+                 ALTER TABLE custom_reminders ADD COLUMN alarm INTEGER NOT NULL DEFAULT 0;
+                 INSERT INTO widget_schema (version) VALUES (6);
+                 COMMIT;",
+            )?;
+        }
         Ok(())
     }
 

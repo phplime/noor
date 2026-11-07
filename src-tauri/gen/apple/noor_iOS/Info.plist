@@ -20,8 +20,12 @@
 	<string>0.1.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>Noor rings reminders you mark as alarms at their exact time, until you press Stop.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Noor counts your daily steps for the Fitness section. Step data stays on your iPhone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Noor opens the photos you choose so you can edit them on your iPhone.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -52,8 +56,6 @@
 	<true/>
 	<key>UIFileSharingEnabled</key>
 	<true/>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Noor opens the photos you choose so you can edit them on your iPhone.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Noor can save edited photos to your library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

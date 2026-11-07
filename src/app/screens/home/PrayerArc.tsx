@@ -1,7 +1,8 @@
+import { prayerLabel, useLang } from '../../lang';
 import { useNow } from '../../../island/lib/hooks';
 import type { CSSProperties } from 'react';
 import { formatCountdown, formatTime } from '../../../island/lib/time';
-import { PRAYER_NAMES, type DailyPrayerSchedule } from '../../../island/lib/types';
+import { type DailyPrayerSchedule } from '../../../island/lib/types';
 import { currentPeriod, dayTimes, PERIOD_BN, tahajjud } from '../../periods';
 import { NIcon } from '../../icons';
 import { moonPhase, PHASE_NAME } from '../../moon';
@@ -62,6 +63,7 @@ const STARS = Array.from({ length: 28 }, (_, i) => {
 
 export function PrayerArc({ days, now: _now, tz, use24, location, weather, onOpen }: { days: DailyPrayerSchedule[]; now: number; tz: string; use24: boolean; location: string; weather?: Weather | null; onOpen: () => void }) {
   const now = useNow(1000);
+  const lang = useLang();
   const today = days[0];
   if (!today) return null;
   const dt = dayTimes(days);
@@ -192,7 +194,7 @@ export function PrayerArc({ days, now: _now, tz, use24, location, weather, onOpe
         </p>
       ) : next && (
         <p className="n-sky__next">
-          Next · {PRAYER_NAMES[next.prayer]} {formatTime(next.time, tz, use24)}
+          {lang === 'bn' ? 'পরবর্তী' : 'Next'} · {prayerLabel(next.prayer, lang)} {formatTime(next.time, tz, use24)}
           {next.jamaat && <> · Jamaat {formatTime(next.jamaat, tz, use24)}</>}
         </p>
       )}

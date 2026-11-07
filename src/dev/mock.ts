@@ -404,7 +404,7 @@ const cal: { settings: CalendarSettings; specials: SpecialDay[]; profile: Profil
   ],
   profile: { name: 'Nazmul', avatar: null, cover: null, photos: [], birthday: '03-14' },
   ramadan: {
-    enabled: true, overrideYear: null, overrideStart: null, sehriEndBeforeFajrMin: 0, wakeBeforeMin: 45, sehriWarningMin: 10,
+    enabled: true, overrideYear: null, overrideStart: null, sehriEndBeforeFajrMin: 0, wakeBeforeMin: 45, sehriWarningMin: 10, sehriEndAlert: true,
     iftarHeadsupMin: 15, iftarAlert: true, leanPrayerAlerts: true, wakeSound: 'noor_dawn', iftarSound: 'noor_chime',
   },
 };
@@ -696,6 +696,32 @@ mockIPC(
           score: 1, scoreOf: 4,
         };
       }
+      case 'voice_get':
+        return { settings: mockVoice, events: MOCK_EVENTS, hasBn: true, hasEn: true, ios: true };
+      case 'voice_save':
+        mockVoice = a.settings as typeof mockVoice;
+        return mockVoice;
+      case 'voice_test':
+        return true;
+      case 'optimize_device':
+        return { battery: 0.46, charging: 'unplugged', lowPower: false, thermal: 'fair', free: 23.4e9, total: 128e9 };
+      case 'optimize_junk_scan':
+        return new Promise((r) => setTimeout(() => r(mockJunk), 500));
+      case 'optimize_junk_clean': {
+        const paths = new Set(a.paths as string[]);
+        let freed = 0;
+        for (const g of mockJunk) {
+          g.files = g.files.filter((f) => (paths.has(f.path) ? ((freed += f.size), false) : true));
+        }
+        return freed;
+      }
+      case 'optimize_photos_scan': {
+        const part = a.part as 'screenshots' | 'videos' | 'duplicates';
+        const all = mockPhotos();
+        return new Promise((r) => setTimeout(() => r({ [part]: all[part], scanned: 600 }), part === 'duplicates' ? 1600 : 800));
+      }
+      case 'optimize_photos_delete':
+        return 'ok';
       case 'fitness_motion_available':
         return false;
       case 'fitness_save_profile':
@@ -796,3 +822,56 @@ mockIPC(
   },
   { shouldMockEvents: true },
 );
+
+// ---- Settings › Optimize (preview data) ----
+const mockJunk = [
+  {
+    id: 'temp', label: 'Temporary files', detail: 'Left over from imports, previews and exports', safe: true,
+    files: [
+      { path: '/tmp/preview-3f2a.png', name: 'preview-3f2a.png', size: 4_820_000, modified: 1_793_700_000 },
+      { path: '/tmp/export-batch.zip', name: 'export-batch.zip', size: 18_200_000, modified: 1_793_600_000 },
+      { path: '/tmp/heic-convert.jpg', name: 'heic-convert.jpg', size: 2_310_000, modified: 1_793_500_000 },
+    ],
+  },
+  {
+    id: 'imports', label: 'Imported photo copies', detail: 'Copies Noor made when you picked photos in Studio', safe: true,
+    files: [{ path: '/cache/imports/IMG_2201.jpg', name: 'IMG_2201.jpg', size: 3_100_000, modified: 1_793_400_000 }],
+  },
+  {
+    id: 'exports', label: 'Studio exports', detail: 'Images you saved from Studio (Files › On My iPhone › Noor)', safe: false,
+    files: [
+      { path: '/docs/Noor/watermark-01.jpg', name: 'watermark-01.jpg', size: 1_900_000, modified: 1_793_300_000 },
+      { path: '/docs/Noor/collage-eid.jpg', name: 'collage-eid.jpg', size: 5_400_000, modified: 1_793_200_000 },
+    ],
+  },
+];
+
+function mockThumb(hue: number, label: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},55%,62%)"/><stop offset="1" stop-color="hsl(${hue + 40},50%,38%)"/></linearGradient></defs><rect width="180" height="180" fill="url(#g)"/><circle cx="130" cy="50" r="18" fill="rgba(255,255,255,.55)"/><path d="M0 150 L60 95 L105 135 L135 110 L180 150 L180 180 L0 180Z" fill="rgba(0,0,0,.25)"/><text x="12" y="28" font-family="sans-serif" font-size="16" fill="white">${label}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function mockPhotos() {
+  const ph = (id: string, hue: number, label: string, size: number, w = 4032, h = 3024, duration = 0) => ({
+    id, size, w, h, duration, date: '2026-10-20T10:00:00Z', thumb: mockThumb(hue, label),
+  });
+  return {
+    scanned: 1840,
+    duplicates: [
+      [ph('d1', 30, 'Eid 1', 3_400_000), ph('d2', 32, 'Eid 2', 3_100_000, 3024, 2268), ph('d3', 28, 'Eid 3', 3_300_000)],
+      [ph('d4', 200, 'Beach', 2_900_000), ph('d5', 202, 'Beach', 2_800_000)],
+      [ph('d6', 120, 'Garden', 4_100_000), ph('d7', 118, 'Garden', 4_000_000)],
+    ],
+    screenshots: Array.from({ length: 9 }, (_, i) => ph(`s${i}`, 260 + i * 6, `Shot ${i + 1}`, 900_000 + i * 70_000, 1179, 2556)),
+    videos: [ph('v1', 340, '4K video', 812_000_000, 3840, 2160, 214), ph('v2', 10, 'Concert', 356_000_000, 1920, 1080, 402), ph('v3', 170, 'Trip', 98_000_000, 1920, 1080, 61)],
+  };
+}
+
+// ---- Settings › Language & voice (preview data) ----
+let mockVoice: { lang: 'bn' | 'en' | 'mix'; speak: boolean; speakEvents: string[]; texts: Record<string, { bn: string; en: string }> } = {
+  lang: 'mix',
+  speak: true,
+  speakEvents: [],
+  texts: {},
+};
+const MOCK_EVENTS = [{"id": "prayer_start", "label": "Prayer time starts", "bn": "এখন {prayer_of} ওয়াক্ত শুরু হলো", "en": "It's time for {prayer}", "vars": ["prayer", "prayer_of"]}, {"id": "prayer_before", "label": "Before a prayer starts", "bn": "{prayer_of} ওয়াক্ত শুরু হতে {min} মিনিট বাকি", "en": "{prayer} starts in {min} minutes", "vars": ["prayer", "prayer_of", "min"]}, {"id": "prayer_after", "label": "After a prayer started", "bn": "{prayer_of} ওয়াক্ত শুরু হয়েছে {min} মিনিট আগে", "en": "{prayer} started {min} minutes ago", "vars": ["prayer", "prayer_of", "min"]}, {"id": "jamaat_before", "label": "Before jamaat", "bn": "{prayer_of} জামাত {min} মিনিট পর, অজু করে নিন", "en": "{prayer} jamaat in {min} minutes", "vars": ["prayer", "prayer_of", "min"]}, {"id": "jamaat", "label": "Jamaat starts", "bn": "এখন {prayer_of} জামাত শুরু", "en": "{prayer} jamaat is starting now", "vars": ["prayer", "prayer_of"]}, {"id": "sunrise", "label": "Sunrise", "bn": "সূর্যোদয় হয়েছে, ফজরের সময় শেষ", "en": "Sunrise. Fajr time is over", "vars": []}, {"id": "makruh_start", "label": "No-salah time starts", "bn": "এখন নামাজের নিষিদ্ধ সময় শুরু", "en": "No-salah time has started", "vars": []}, {"id": "makruh_end", "label": "No-salah time ends", "bn": "নিষিদ্ধ সময় শেষ, এখন নামাজ পড়া যাবে", "en": "No-salah time is over, you can pray now", "vars": []}, {"id": "sehri_wake", "label": "Sehri wake-up", "bn": "সেহরির সময় হয়েছে, উঠুন", "en": "Wake up, it's time for Sehri", "vars": []}, {"id": "sehri_before", "label": "Before Sehri ends", "bn": "সেহরির সময় শেষ হতে {min} মিনিট বাকি", "en": "Sehri ends in {min} minutes", "vars": ["min"]}, {"id": "sehri_end", "label": "Sehri ends", "bn": "সেহরির সময় শেষ, এখন থেকে রোজা শুরু", "en": "Sehri time is over. Your fast begins", "vars": []}, {"id": "iftar_before", "label": "Before Iftar", "bn": "ইফতারের {min} মিনিট বাকি", "en": "Iftar in {min} minutes", "vars": ["min"]}, {"id": "iftar", "label": "Iftar time", "bn": "ইফতারের সময় হয়েছে", "en": "It's time for Iftar", "vars": []}];

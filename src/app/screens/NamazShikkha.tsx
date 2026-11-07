@@ -7,6 +7,8 @@ import {
   DUA_QUNUT,
   FARZ_INSIDE,
   FARZ_OUTSIDE,
+  KALEMAS,
+  KALEMA_NOTE,
   NIYATS,
   NIYAT_NOTE,
   RAKATS,
@@ -19,16 +21,17 @@ import {
   type Recite,
 } from '../namaz';
 
-type Part = 'steps' | 'niyat' | 'rakat' | 'wudu';
+type Part = 'steps' | 'niyat' | 'kalema' | 'rakat' | 'wudu';
 
 const PARTS: { id: Part; label: string }[] = [
   { id: 'steps', label: 'নামাজের নিয়ম' },
   { id: 'niyat', label: 'নিয়ত' },
+  { id: 'kalema', label: 'কালেমা' },
   { id: 'rakat', label: 'রাকাত' },
   { id: 'wudu', label: 'ওজু' },
 ];
 
-/** নামাজ শিক্ষা — how to pray, niyat, rakat counts and wudu. */
+/** নামাজ শিক্ষা — how to pray, niyat, kalema, rakat counts and wudu. */
 export function NamazShikkha() {
   const [part, setPart] = useState<Part>('steps');
   const [say, setSay] = useState(true);
@@ -43,7 +46,7 @@ export function NamazShikkha() {
         ))}
       </div>
 
-      {(part === 'steps' || part === 'niyat' || part === 'wudu') && (
+      {(part === 'steps' || part === 'niyat' || part === 'kalema' || part === 'wudu') && (
         <div className="n-namaz__tools">
           <button className={`n-chip ${say ? 'is-on' : ''}`} onClick={() => setSay((v) => !v)} lang="bn">
             উচ্চারণ {say ? 'লুকান' : 'দেখান'}
@@ -53,6 +56,7 @@ export function NamazShikkha() {
 
       {part === 'steps' && <Steps say={say} />}
       {part === 'niyat' && <Niyats say={say} />}
+      {part === 'kalema' && <Kalemas say={say} />}
       {part === 'rakat' && <Rakats />}
       {part === 'wudu' && <Wudu say={say} />}
     </div>
@@ -168,6 +172,28 @@ function Niyats({ say }: { say: boolean }) {
       ))}
       <p className="n-namaz__note" lang="bn">
         অন্য সুন্নত বা নফলের নিয়তও একইভাবে — ওয়াক্তের নাম, রাকাত সংখ্যা এবং “সুন্নাতু রাসুলিল্লাহি তাআলা” বা নফলের জন্য “নাফলান” বলুন।
+      </p>
+    </>
+  );
+}
+
+function Kalemas({ say }: { say: boolean }) {
+  return (
+    <>
+      {KALEMAS.map((k, i) => (
+        <article key={k.id} className="n-dua">
+          <header className="n-dua__head">
+            <span className="n-namaz__num">{toBn(i + 1)}</span>
+            <strong lang="bn">{k.name}</strong>
+            <small className="n-namaz__kname" lang="ar" dir="rtl">
+              {k.nameAr}
+            </small>
+          </header>
+          <RecitePane r={k} say={say} />
+        </article>
+      ))}
+      <p className="n-namaz__note" lang="bn">
+        <NIcon name="info" size={14} /> {KALEMA_NOTE}
       </p>
     </>
   );

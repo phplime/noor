@@ -17,6 +17,7 @@ import { QuranHome } from './Quran';
 import { DuasView } from './routine/Duas';
 import { TasbihView } from './routine/Tasbih';
 import { NamazShikkha } from './NamazShikkha';
+import { prayerLabel, useLang } from '../lang';
 import { compassPoint, hijriDate, kaabaDistanceKm, qiblaBearing } from '../islamic';
 import { Card, List, ListRow, Screen, SectionTitle, Segmented, Switch } from '../ui';
 
@@ -90,6 +91,7 @@ function PrayerTimes({ snapshot, view, setView }: { snapshot: PrayerSnapshot | n
 }
 
 function DayView({ snapshot }: { snapshot: PrayerSnapshot }) {
+  const lang = useLang();
   const { flash, reloadPrayer } = useNoor();
   const now = useNow(1000);
   const tz = snapshot.activeLocation.timezone;
@@ -202,7 +204,7 @@ function DayView({ snapshot }: { snapshot: PrayerSnapshot }) {
                 )}
                 <div className="n-prayer__main">
                   <div className="n-prayer__name">
-                    {PRAYER_NAMES[e.prayer]}
+                    <span lang={lang === 'bn' ? 'bn' : undefined}>{prayerLabel(e.prayer, lang)}</span>
                     {e.jamaat && (
                       <span className="n-tag n-tag--j">
                         Jamaat {formatTime(e.jamaat, tz, use24)}

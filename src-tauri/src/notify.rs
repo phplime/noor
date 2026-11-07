@@ -11,6 +11,7 @@
 //! Sounds are WAV files that ship inside the app and are copied to
 //! `Library/Sounds`, where iOS looks for custom notification sounds.
 
+use std::sync::atomic::{AtomicU64, Ordering};
 use nexa_prayer::Prayer;
 use crate::island_state::{local_tz, IslandState};
 use chrono::{DateTime, Datelike, Duration, NaiveDate, NaiveTime, TimeZone, Utc};
@@ -24,6 +25,8 @@ use serde::Serialize;
 use std::sync::mpsc::{Receiver, RecvTimeoutError};
 use tauri::{AppHandle, Emitter, Manager};
 
+/// Without AlarmKit, an alarm reminder repeats this many times, a minute apart.
+const ALARM_FALLBACK_REPEATS: i64 = 4;
 /// iOS allows 64 pending requests per app; keep a few free for tests.
 const MAX_PENDING: usize = 60;
 const PRAYER_HORIZON_DAYS: i64 = 8;
@@ -49,6 +52,10 @@ pub const SOUNDS: &[(&str, &str, &[u8])] = &[
 /// Accepts the macOS names used by Nexa Island so imported settings still work.
 #[cfg_attr(not(target_os = "ios"), allow(dead_code))]
 pub fn sound_file(name: &str) -> Option<String> {
+    // A spoken text rendered into Library/Sounds (see voice.rs).
+    if let Some(file) = name.strip_prefix("voice:") {
+        return Some(file.to_string());
+    }
     let id = match name.trim() {
         "" | "none" => return None,
         "default" => "noor_chime",
@@ -89,7 +96,7 @@ pub fn install_sounds(app: &AppHandle) {
 }
 
 /// One notification Noor wants the system to deliver.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Planned {
     /// prayer | ramadan | special | cycle | water | timer | reminder | refresh
@@ -100,6 +107,12 @@ pub struct Planned {
     pub title: String,
     pub body: String,
     pub sound: String,
+    /// What it is about, for the user's language and wording (see `voice.rs`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub event: Option<crate::voice::Event>,
+    /// Text spoken aloud as the alert sound (iPhone).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub speak: Option<String>,
 }
 
 /// A local wall-clock time on a date → UTC.
@@ -137,13 +150,22 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                     if ramadan_in_reach && ram_settings.lean_prayer_alerts && in_ramadan && p.offset_minutes != 0 {
                         continue;
                     }
+                    let key = p.prayer.key();
+                    let event = Some(match (p.reminder_id.as_str(), p.offset_minutes) {
+                        ("jamaat-before", off) => crate::voice::Event::prayer("jamaat_before", key, Some(-(off as i64))),
+                        ("jamaat", _) => crate::voice::Event::prayer("jamaat", key, None),
+                        (_, 0) if key == "sunrise" => crate::voice::Event::new("sunrise"),
+                        (_, 0) => crate::voice::Event::prayer("prayer_start", key, None),
+                        (_, off) if off < 0 => crate::voice::Event::prayer("prayer_before", key, Some(-(off as i64))),
+                        (_, off) => crate::voice::Event::prayer("prayer_after", key, Some(off as i64)),
+                    });
                     out.push(Planned {
                         kind: "prayer".into(),
                         route: format!("prayer:{}", p.prayer.key()),
                         fire_at: p.fire_at,
                         title: p.title,
                         body: p.body,
-                        sound: p.sound,
+                        sound: p.sound, event, ..Default::default()
                     });
                 }
             }
@@ -162,7 +184,15 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
             Err(_) => vec![],
         };
         for a in ramadan::plan_alerts(&ram_settings, &days, tz, use24, soon, now + Duration::days(PRAYER_HORIZON_DAYS)) {
-            out.push(Planned { kind: "ramadan".into(), route: "ramadan".into(), fire_at: a.at, title: a.title, body: a.body, sound: a.sound });
+            let event = match a.kind {
+                "wake" => Some(crate::voice::Event::new("sehri_wake")),
+                "sehri" => Some(crate::voice::Event { minutes: Some(ram_settings.sehri_warning_min as i64), ..crate::voice::Event::new("sehri_before") }),
+                "sehri-end" => Some(crate::voice::Event::new("sehri_end")),
+                "headsup" => Some(crate::voice::Event { minutes: Some(ram_settings.iftar_headsup_min as i64), ..crate::voice::Event::new("iftar_before") }),
+                "iftar" => Some(crate::voice::Event::new("iftar")),
+                _ => None,
+            };
+            out.push(Planned { kind: "ramadan".into(), route: "ramadan".into(), fire_at: a.at, title: a.title, body: a.body, sound: a.sound, event, ..Default::default() });
         }
     }
 
@@ -180,7 +210,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                     1 => format!("Tomorrow{}", if sd.note.is_empty() { String::new() } else { format!(" — {}", sd.note) }),
                     n => format!("In {n} days{}", if sd.note.is_empty() { String::new() } else { format!(" — {}", sd.note) }),
                 };
-                out.push(Planned { kind: "special".into(), route: "calendar".into(), fire_at: at, title: sd.title.clone(), body, sound: sd.sound.clone() });
+                out.push(Planned { kind: "special".into(), route: "calendar".into(), fire_at: at, title: sd.title.clone(), body, sound: sd.sound.clone(), ..Default::default() });
             }
         }
         if cal_settings.holiday_alerts {
@@ -197,7 +227,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                     fire_at: at,
                     title: format!("Tomorrow: {}", d.occasion.en),
                     body: if d.occasion.bn.is_empty() { "Public holiday".into() } else { format!("{} · Public holiday", d.occasion.bn) },
-                    sound: "noor_soft".into(),
+                    sound: "noor_soft".into(), ..Default::default()
                 });
             }
         }
@@ -211,7 +241,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
             let who = if cs.name.is_empty() { String::new() } else { format!(" · {}", cs.name) };
             let mut add = |date: NaiveDate, title: String, body: String| {
                 if let Some(at) = at_local(tz, date, time).filter(|t| *t > soon && *t < now + Duration::days(SPECIAL_HORIZON_DAYS)) {
-                    out.push(Planned { kind: "cycle".into(), route: "cycle".into(), fire_at: at, title, body, sound: "noor_soft".into() });
+                    out.push(Planned { kind: "cycle".into(), route: "cycle".into(), fire_at: at, title, body, sound: "noor_soft".into(), ..Default::default() });
                 }
             };
             if let Some(next) = st.next_start {
@@ -261,7 +291,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                         fire_at: at,
                         title: "Weigh-in day ⚖️".into(),
                         body: "Step on the scale before breakfast and log it in Noor to keep your trend accurate.".into(),
-                        sound: "noor_soft".into(),
+                        sound: "noor_soft".into(), ..Default::default()
                     });
                 }
             }
@@ -278,7 +308,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                     fire_at: at,
                     title: format!("{label} — done ⏱"),
                     body: "Your timer has finished.".into(),
-                    sound: "noor_timer".into(),
+                    sound: "noor_timer".into(), ..Default::default()
                 });
             }
         }
@@ -320,7 +350,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
                         fire_at: at,
                         title: "Time to drink water 💧".into(),
                         body,
-                        sound: "noor_pop".into(),
+                        sound: "noor_pop".into(), ..Default::default()
                     });
                     count += 1;
                     let next_today = if on_today { total } else { 0 };
@@ -332,15 +362,62 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
         // ----- personal reminders -----------------------------------------
         if let Ok(list) = db.reminders() {
             for r in list {
-                for at in occurrences(&r, tz, soon, now + Duration::days(REMINDER_HORIZON_DAYS), 30) {
-                    out.push(Planned {
-                        kind: "reminder".into(),
-                        route: format!("reminder:{}", r.id),
-                        fire_at: at,
-                        title: r.title.clone(),
-                        body: if r.note.is_empty() { "Reminder".into() } else { r.note.clone() },
-                        sound: r.sound.clone(),
-                    });
+                // Each occurrence may bring several alerts (before + exact): plan fewer occurrences
+                // then, to leave room in iOS's limit of 64 pending notifications.
+                let per = 1 + r.before.len();
+                let max_occ = (30 / per).max(3);
+                let time_fmt = |t: chrono::DateTime<Utc>| t.with_timezone(&tz).format("%-I:%M %p").to_string();
+                for at in occurrences(&r, tz, soon, now + Duration::days(REMINDER_HORIZON_DAYS), max_occ) {
+                    for &m in &r.before {
+                        let early = at - Duration::minutes(m as i64);
+                        if early <= soon {
+                            continue;
+                        }
+                        out.push(Planned {
+                            kind: "reminder".into(),
+                            route: format!("reminder:{}", r.id),
+                            fire_at: early,
+                            title: format!("{} · in {}", r.title, nexa_widgets::reminders::before_label(m)),
+                            body: if r.note.is_empty() { format!("At {}", time_fmt(at)) } else { format!("At {} · {}", time_fmt(at), r.note) },
+                            sound: r.sound.clone(), ..Default::default()
+                        });
+                    }
+                    if r.exact {
+                        let body = if r.note.is_empty() { "Reminder".to_string() } else { r.note.clone() };
+                        if r.alarm && crate::ios_alarm::supported() {
+                            // Rings until stopped: handed to AlarmKit in `reschedule`.
+                            out.push(Planned {
+                                kind: "alarm".into(),
+                                route: format!("reminder:{}", r.id),
+                                fire_at: at,
+                                title: format!("⏰ {}", r.title),
+                                body,
+                                sound: r.sound.clone(), ..Default::default()
+                            });
+                        } else {
+                            out.push(Planned {
+                                kind: "reminder".into(),
+                                route: format!("reminder:{}", r.id),
+                                fire_at: at,
+                                title: r.title.clone(),
+                                body: body.clone(),
+                                sound: r.sound.clone(), ..Default::default()
+                            });
+                            if r.alarm {
+                                // No real alarms here: keep ringing once a minute for 5 minutes.
+                                for k in 1..=ALARM_FALLBACK_REPEATS {
+                                    out.push(Planned {
+                                        kind: "reminder".into(),
+                                        route: format!("reminder:{}", r.id),
+                                        fire_at: at + Duration::minutes(k),
+                                        title: format!("⏰ {} (still ringing)", r.title),
+                                        body: body.clone(),
+                                        sound: r.sound.clone(), ..Default::default()
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -371,13 +448,26 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
             Err(_) => vec![],
         };
         for a in nexa_widgets::sunnah::plan(&cal_settings, &days, tz, use24, soon, now + Duration::days(SUNNAH_HORIZON_DAYS)) {
-            out.push(Planned { kind: "sunnah".into(), route: a.route, fire_at: a.at, title: a.title, body: a.body, sound: "noor_soft".into() });
+            out.push(Planned { kind: "sunnah".into(), route: a.route, fire_at: a.at, title: a.title, body: a.body, sound: "noor_soft".into(), ..Default::default() });
         }
         if cal_settings.makruh_alerts {
             // Six a day, so only the next ~2 days to leave room for prayer alerts.
             for a in nexa_widgets::sunnah::plan_makruh(&days, tz, use24, soon, now + Duration::hours(MAKRUH_HORIZON_HOURS)) {
-                out.push(Planned { kind: "makruh".into(), route: a.route, fire_at: a.at, title: a.title, body: a.body, sound: "noor_soft".into() });
+                let event = Some(crate::voice::Event::new(if a.kind == "makruh-end" { "makruh_end" } else { "makruh_start" }));
+                out.push(Planned { kind: "makruh".into(), route: a.route, fire_at: a.at, title: a.title, body: a.body, sound: "noor_soft".into(), event, ..Default::default() });
             }
+        }
+    }
+
+    // ----- language & spoken text --------------------------------------
+    let voice = state.wdb.lock().ok().map(|db| crate::voice::settings_of(&db)).unwrap_or_default();
+    for p in out.iter_mut() {
+        if let Some(ev) = &p.event {
+            let (title, speak) = crate::voice::apply(&voice, ev);
+            if let Some(t) = title {
+                p.title = t;
+            }
+            p.speak = speak;
         }
     }
 
@@ -391,10 +481,18 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
             fire_at: last + Duration::minutes(1),
             title: "Open Noor ✨".into(),
             body: "Tap to keep your prayer times and reminders coming.".into(),
-            sound: "noor_soft".into(),
+            sound: "noor_soft".into(), ..Default::default()
         });
     }
     out
+}
+
+/// Fingerprint of the plan last handed to iOS (0 = none / must reschedule).
+static LAST_PLAN: AtomicU64 = AtomicU64::new(0);
+
+/// Make the next re-plan schedule everything even if the plan looks unchanged.
+pub fn force_next() {
+    LAST_PLAN.store(0, Ordering::SeqCst);
 }
 
 /// Background thread that re-plans (debounced) whenever something changes.
@@ -423,12 +521,47 @@ pub fn spawn(app: AppHandle, rx: Receiver<()>) {
 /// Replace every pending notification with the current plan.
 pub fn reschedule(app: &AppHandle) {
     let state = app.state::<IslandState>();
-    let plan = plan_all(&state, Utc::now());
+    #[allow(unused_mut)]
+    let mut plan = plan_all(&state, Utc::now());
+    // Battery: Noor re-plans on every launch, foreground and setting change. When the plan is
+    // exactly what iOS already has queued, skip the cancel-and-reschedule of ~60 notifications
+    // (plus voice files and alarms).
+    {
+        use std::hash::{Hash, Hasher};
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        format!("{plan:?}").hash(&mut h);
+        let fp = h.finish().max(1);
+        if LAST_PLAN.swap(fp, Ordering::SeqCst) == fp {
+            return;
+        }
+    }
+    // iPhone: turn spoken texts into alert sounds before scheduling.
+    let voice_lang = state.wdb.lock().ok().map(|db| crate::voice::settings_of(&db).voice_lang()).unwrap_or_default();
+    crate::voice::prepare_audio(&mut plan, voice_lang);
+    // iPhone 26+: alarm reminders go to AlarmKit (ring until Stop); the rest stay notifications.
+    if crate::ios_alarm::supported() {
+        let alarms: Vec<(String, i64, String)> = plan
+            .iter()
+            .filter(|p| p.kind == "alarm")
+            .take(20)
+            .map(|p| (crate::ios_alarm::alarm_uuid(&p.route, p.fire_at.timestamp()), p.fire_at.timestamp(), p.title.trim_start_matches("⏰ ").to_string()))
+            .collect();
+        let res = crate::ios_alarm::sync(&alarms);
+        if res == "ok" {
+            plan.retain(|p| p.kind != "alarm");
+        } else {
+            eprintln!("Noor: alarms not scheduled ({res}); using notifications");
+            for p in plan.iter_mut().filter(|p| p.kind == "alarm") {
+                p.kind = "reminder".into();
+            }
+        }
+    }
     #[cfg(mobile)]
     {
         use tauri_plugin_notification::{NotificationExt, PermissionState};
         let n = app.notification();
         if !matches!(n.permission_state(), Ok(PermissionState::Granted)) {
+            LAST_PLAN.store(0, Ordering::SeqCst);
             let _ = app.emit("notify://scheduled", 0usize);
             return;
         }
@@ -559,6 +692,7 @@ pub fn notify_permission(app: AppHandle, request: bool) -> String {
             _ => "prompt",
         };
         if out == "granted" {
+            force_next();
             app.state::<IslandState>().refresh_scheduler();
         }
         out.to_string()
@@ -579,7 +713,7 @@ pub fn notify_test(app: AppHandle, title: Option<String>, body: Option<String>, 
         fire_at: Utc::now() + Duration::seconds(delay_secs.unwrap_or(5).clamp(2, 3600)),
         title: title.unwrap_or_else(|| "Noor ✨".into()),
         body: body.unwrap_or_else(|| "This is how your reminders will look and sound.".into()),
-        sound: sound.unwrap_or_else(|| "default".into()),
+        sound: sound.unwrap_or_else(|| "default".into()), ..Default::default()
     };
     #[cfg(mobile)]
     {
@@ -594,6 +728,24 @@ pub fn notify_test(app: AppHandle, title: Option<String>, body: Option<String>, 
     {
         use tauri_plugin_notification::NotificationExt;
         let _ = TEST_ID;
+        app.notification().builder().title(&p.title).body(&p.body).show().map_err(|e| e.to_string())
+    }
+}
+
+/// Deliver one notification a few seconds from now (used by the voice test).
+pub fn send_test(app: &AppHandle, p: &Planned) -> Result<(), String> {
+    #[cfg(mobile)]
+    {
+        use tauri_plugin_notification::NotificationExt;
+        let _ = app.notification().cancel(vec![TEST_ID]);
+        if !schedule_one(app, TEST_ID, p) {
+            return Err("iOS refused the notification. Check Settings › Noor › Notifications.".into());
+        }
+        Ok(())
+    }
+    #[cfg(not(mobile))]
+    {
+        use tauri_plugin_notification::NotificationExt;
         app.notification().builder().title(&p.title).body(&p.body).show().map_err(|e| e.to_string())
     }
 }
@@ -638,10 +790,18 @@ mod tests {
                 enabled: true,
                 sound: "noor_bell".into(),
                 color: String::new(),
+                before: vec![30],
+                exact: true,
+                alarm: false,
             })
             .unwrap();
         }
         let plan = plan_all(&st, now);
+        // The reminder alerts 30 min early and at the time.
+        let vit: Vec<_> = plan.iter().filter(|p| p.kind == "reminder").take(2).collect();
+        assert_eq!(vit.len(), 2);
+        assert_eq!(vit[1].fire_at - vit[0].fire_at, Duration::minutes(30));
+        assert_eq!(vit[0].title, "Vitamins · in 30 min");
         assert!(plan.len() <= MAX_PENDING, "{} planned", plan.len());
         assert!(plan.windows(2).all(|w| w[0].fire_at <= w[1].fire_at));
         assert!(plan.iter().all(|p| p.fire_at > now));

@@ -50,7 +50,7 @@ export function RemindersView() {
   const blank = (): ReminderInput => {
     const d = new Date(Date.now() + 60 * 60_000);
     d.setMinutes(0, 0, 0);
-    return { title: '', note: '', at: toLocalInput(d), repeat: 'never', enabled: true, sound: 'noor_chime', color: COLORS[0] };
+    return { title: '', note: '', at: toLocalInput(d), repeat: 'never', enabled: true, sound: 'noor_chime', color: COLORS[0], before: [], exact: true, alarm: false };
   };
 
   const toggle = async (r: Reminder, v: boolean) => {
@@ -97,7 +97,7 @@ export function RemindersView() {
                     d.setHours(q.hour, q.minute, 0, 0);
                     if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
                   }
-                  setEditing({ title: q.title, note: '', at: toLocalInput(d), repeat: q.repeat, enabled: true, sound: 'noor_chime', color: COLORS[1] });
+                  setEditing({ title: q.title, note: '', at: toLocalInput(d), repeat: q.repeat, enabled: true, sound: 'noor_chime', color: COLORS[1], before: [], exact: true, alarm: false });
                 }}
               >
                 <NIcon name="plus" size={14} stroke={2.4} /> {q.title}
@@ -117,6 +117,7 @@ export function RemindersView() {
                 <div className="n-rem__title">{r.title}</div>
                 <div className="n-rem__when">
                   {whenLabel(next!, now)} · {REPEAT_LABELS[r.repeat]}
+                  {alertsLabel(r) && <> · {alertsLabel(r)}</>}
                 </div>
                 {r.note && <div className="n-rem__note">{r.note}</div>}
               </div>
@@ -209,27 +210,58 @@ function ReminderSheet({ value, onClose }: { value: ReminderInput | null; onClos
         <input className="n-input n-input--big" placeholder="What should I remind you?" value={draft.title} autoFocus={!draft.id} onChange={(e) => set({ title: e.target.value })} />
         <textarea className="n-input" placeholder="Note (optional)" rows={2} value={draft.note} onChange={(e) => set({ note: e.target.value })} />
 
-        <div className="n-form__grid">
+        <div className="n-field">
+          <span>Repeat</span>
+          <div className="n-choice">
+            {(Object.keys(REPEAT_LABELS) as Repeat[]).map((r) => (
+              <button key={r} className={draft.repeat === r ? 'is-on' : ''} onClick={() => set({ repeat: r, at: `${dateFor(r, date)}T${time}` })}>
+                {REPEAT_LABELS[r]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {draft.repeat === 'weekly' && (
+          <div className="n-field">
+            <span>On</span>
+            <div className="n-choice n-choice--days">
+              {WEEK.map(([label, dow]) => (
+                <button key={dow} className={weekdayOf(date) === dow ? 'is-on' : ''} onClick={() => set({ at: `${nextWeekday(dow)}T${time}` })}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {draft.repeat === 'monthly' && (
           <label className="n-field">
-            <span>Date</span>
-            <input className="n-input" type="date" value={date} onChange={(e) => set({ at: `${e.target.value}T${time}` })} />
+            <span>Day of the month</span>
+            <select className="n-input" value={Number(date.slice(8, 10))} onChange={(e) => set({ at: `${nextMonthDay(Number(e.target.value))}T${time}` })}>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                  {d > 28 ? ' (or the last day)' : ''}
+                </option>
+              ))}
+            </select>
           </label>
+        )}
+
+        <div className={draft.repeat === 'never' ? 'n-form__grid' : ''}>
+          {draft.repeat === 'never' && (
+            <label className="n-field">
+              <span>Date</span>
+              <input className="n-input" type="date" value={date} onChange={(e) => set({ at: `${e.target.value}T${time}` })} />
+            </label>
+          )}
           <label className="n-field">
             <span>Time</span>
             <input className="n-input" type="time" value={time} onChange={(e) => set({ at: `${date}T${e.target.value}` })} />
           </label>
         </div>
 
-        <div className="n-field">
-          <span>Repeat</span>
-          <div className="n-choice">
-            {(Object.keys(REPEAT_LABELS) as Repeat[]).map((r) => (
-              <button key={r} className={draft.repeat === r ? 'is-on' : ''} onClick={() => set({ repeat: r })}>
-                {REPEAT_LABELS[r]}
-              </button>
-            ))}
-          </div>
-        </div>
+        <AlertsPicker draft={draft} set={set} />
 
         <div className="n-field">
           <span>Sound</span>
@@ -267,4 +299,127 @@ function ReminderSheet({ value, onClose }: { value: ReminderInput | null; onClos
       </div>
     </Sheet>
   );
+}
+
+// ---------- Several alerts per reminder ----------
+
+const BEFORE_CHOICES = [5, 10, 15, 30, 60, 120, 1440];
+
+export const minLabel = (m: number) =>
+  m % 1440 === 0 ? `${m / 1440} day${m === 1440 ? '' : 's'}` : m % 60 === 0 ? `${m / 60} h` : m > 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`;
+
+/** "30 min + 10 min before · alarm" for the list. */
+function alertsLabel(r: { before?: number[]; exact?: boolean; alarm?: boolean }): string {
+  const parts: string[] = [];
+  if (r.before?.length) parts.push(`${r.before.map(minLabel).join(' + ')} before`);
+  if (r.alarm) parts.push('⏰ alarm');
+  else if (r.exact === false) parts.push('no alert at the time');
+  return parts.join(' · ');
+}
+
+function AlertsPicker({ draft, set }: { draft: ReminderInput; set: (p: Partial<ReminderInput>) => void }) {
+  const [custom, setCustom] = useState('');
+  const before = draft.before ?? [];
+  const toggle = (m: number) => {
+    const next = before.includes(m) ? before.filter((x) => x !== m) : [...before, m];
+    set({ before: next.sort((a, b) => b - a).slice(0, 5) });
+  };
+  const addCustom = () => {
+    const m = Math.round(Number(custom));
+    if (m >= 1 && m <= 10080 && !before.includes(m)) toggle(m);
+    setCustom('');
+  };
+  const extra = before.filter((m) => !BEFORE_CHOICES.includes(m));
+  const exact = draft.exact ?? true;
+  const alarm = draft.alarm ?? false;
+  const summary = [...before.map((m) => `${minLabel(m)} before`), exact || alarm ? (alarm ? 'alarm at the time' : 'at the time') : null].filter(Boolean);
+
+  return (
+    <div className="n-field n-alerts">
+      <span>Alerts</span>
+      <div className="n-alerts__box">
+        <small>Also remind me before</small>
+        <div className="n-choice n-choice--wrap">
+          {[...BEFORE_CHOICES, ...extra].map((m) => (
+            <button key={m} className={before.includes(m) ? 'is-on' : ''} onClick={() => toggle(m)}>
+              {minLabel(m)}
+            </button>
+          ))}
+        </div>
+        <div className="n-alerts__custom">
+          <input className="n-input" type="number" inputMode="numeric" min={1} max={10080} placeholder="Other: minutes" value={custom} onChange={(e) => setCustom(e.target.value)} />
+          <button className="n-chip" disabled={!custom} onClick={addCustom}>
+            Add
+          </button>
+        </div>
+
+        <div className="n-switchrow">
+          <span>
+            At the exact time
+            <small>A notification when it's time</small>
+          </span>
+          <Switch checked={exact || alarm} onChange={(v) => set({ exact: v, alarm: v ? alarm : false })} />
+        </div>
+        <div className="n-switchrow">
+          <span>
+            ⏰ Ring like an alarm until I stop it
+            <small>iPhone (iOS 26+): full-screen alarm, rings even on Silent. Otherwise it repeats every minute for 5 minutes.</small>
+          </span>
+          <Switch checked={alarm} onChange={(v) => set({ alarm: v, exact: v ? true : exact })} />
+        </div>
+        {summary.length > 0 && <p className="n-alerts__sum">You'll be alerted: {summary.join(', ')}.</p>}
+        {!summary.length && <p className="n-alerts__sum is-warn">Pick at least one alert.</p>}
+      </div>
+    </div>
+  );
+}
+
+// ---------- Dates for repeating reminders (no date picker needed) ----------
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmd = (s: string) => {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+};
+
+/** Saturday first, as calendars in Bangladesh show it. [label, JS weekday] */
+const WEEK: [string, number][] = [
+  ['Sat', 6],
+  ['Sun', 0],
+  ['Mon', 1],
+  ['Tue', 2],
+  ['Wed', 3],
+  ['Thu', 4],
+  ['Fri', 5],
+];
+
+const weekdayOf = (date: string) => parseYmd(date).getDay();
+
+/** Today or the next date that falls on `dow`. */
+function nextWeekday(dow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7));
+  return ymd(d);
+}
+
+/** This month's `day` if it hasn't passed, otherwise next month's (short months use their last day). */
+function nextMonthDay(day: number): string {
+  const now = new Date();
+  for (let k = 0; k < 2; k++) {
+    const y = now.getFullYear();
+    const m = now.getMonth() + k;
+    const last = new Date(y, m + 1, 0).getDate();
+    const d = new Date(y, m, Math.min(day, last));
+    if (k === 1 || d.getDate() >= now.getDate()) return ymd(d);
+  }
+  return ymd(now);
+}
+
+/** Starting date that fits the repeat rule: daily/weekdays start today; weekly/monthly keep the chosen day. */
+function dateFor(r: Repeat, current: string): string {
+  if (r === 'daily' || r === 'weekdays') return ymd(new Date());
+  if (r === 'weekly') return nextWeekday(weekdayOf(current));
+  if (r === 'monthly') return nextMonthDay(Number(current.slice(8, 10)) || 1);
+  return current;
 }
