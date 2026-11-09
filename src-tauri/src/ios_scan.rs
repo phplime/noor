@@ -21,6 +21,33 @@ pub fn scan() -> Value {
     serde_json::json!({ "error": "unsupported" })
 }
 
+/// One camera photo with an ID-card guide frame (no multi-page scanner).
+pub fn capture(passport: bool) -> Value {
+    #[cfg(target_os = "ios")]
+    {
+        use objc2::msg_send;
+        use objc2::rc::Retained;
+        use objc2::runtime::{AnyClass, Bool};
+        use objc2_foundation::NSString;
+        let Some(cls) = AnyClass::get(c"NoorScan") else {
+            return serde_json::json!({ "error": "Camera not available" });
+        };
+        let out: Retained<NSString> = unsafe { msg_send![cls, capture: Bool::new(passport)] };
+        return serde_json::from_str(&out.to_string()).unwrap_or_else(|_| serde_json::json!({ "error": "bad response" }));
+    }
+    #[cfg(not(target_os = "ios"))]
+    {
+        let _ = passport;
+        serde_json::json!({ "error": "unsupported" })
+    }
+}
+
+#[tauri::command]
+pub async fn capture_card(passport: Option<bool>) -> Value {
+    let p = passport.unwrap_or(false);
+    tauri::async_runtime::spawn_blocking(move || capture(p)).await.unwrap_or(Value::Null)
+}
+
 #[tauri::command]
 pub async fn scan_document() -> Value {
     tauri::async_runtime::spawn_blocking(scan).await.unwrap_or(Value::Null)

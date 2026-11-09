@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../app/AppContext';
 import { ToolbarActions } from '../../layouts/AppLayout';
 import { Checkbox, Field, Section, Segmented, Slider } from '../../components/Field';
@@ -175,19 +176,23 @@ export default function IdScanTool({ active }: ToolProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, clear]);
 
-  /** Open the iPhone scanner for one side, then ask for approval. */
+  /** Take ONE photo of a side (camera with a card-shaped guide), find the card, straighten it, then ask. */
   const scan = async (slot: Slot, guided = false) => {
     setBusy(slot);
     setAskBack(false);
     try {
-      const r = await call<ScanResult>('scan_document');
+      const r = await call<ScanResult>('capture_card', { passport: type === 'passport' });
       if (r?.error) throw new Error(r.error);
       const files = r?.paths?.length ? await load(r.paths) : [];
-      if (!files[0]) return; // cancelled
-      const side: Side = { src: files[0], corners: FULL_QUAD, out: await straighten(files[0], FULL_QUAD) };
+      const src = files[0];
+      if (!src) return; // cancelled
+      const d = await call<Detect>('idscan_detect', { path: src.path });
+      const side: Side = { src, corners: d.corners, out: await straighten(src, d.corners) };
       setReview({ slot, side, guided });
+      // Couldn't find the edges: go straight to the corners so they can be placed by hand.
+      if (!d.found) setEdit({ slot, review: true, src, initial: d.corners, detected: d.corners, found: false, aspect: d.width / Math.max(1, d.height) });
     } catch (e) {
-      notify({ kind: 'error', title: 'Scan failed', message: AppError.from(e).message });
+      notify({ kind: 'error', title: 'Camera', message: AppError.from(e).message });
     } finally {
       setBusy(null);
     }
@@ -367,6 +372,8 @@ export default function IdScanTool({ active }: ToolProps) {
         </div>
       </aside>
 
+      {createPortal(
+        <>
       {review && !edit && (
         <div className="idscan-editor idscan-review" role="dialog" aria-label={`Check the ${SLOT_LABEL[review.slot].toLowerCase()}`}>
           <header className="idscan-editor__bar">
@@ -425,6 +432,10 @@ export default function IdScanTool({ active }: ToolProps) {
           onCancel={() => setEdit(null)}
           onDone={(q) => void finishEdit(q)}
         />
+      )}
+        </>,
+        // Inside the kit's overlay layer so the kit styles apply, above the whole app.
+        (document.querySelector('.n-kit-overlays') as HTMLElement | null) ?? document.body,
       )}
     </div>
   );

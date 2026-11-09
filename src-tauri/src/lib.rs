@@ -91,6 +91,7 @@ pub fn run() {
             optimize::optimize_photos_scan,
             optimize::optimize_photos_delete,
             ios_scan::scan_document,
+            ios_scan::capture_card,
             commands::creative::idscan_detect,
             commands::creative::idscan_straighten,
             commands::images::thumbnail,

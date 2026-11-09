@@ -20,6 +20,9 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
         <NoorMark size={96} />
         <h2>Noor</h2>
         <div className="n-muted">Version {appInfo.version} · نور — “light”</div>
+        <div className="n-muted" style={{ fontSize: 12 }}>
+          Built {new Date(__BUILD_TIME__).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
         <p>
           One calm app for your day: accurate prayer times with reminders that ring, a Qibla compass, water, timer, to-do,
           world clocks and personal reminders — plus a full photo studio.

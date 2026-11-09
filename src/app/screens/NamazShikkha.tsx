@@ -1,3 +1,4 @@
+import { EID, SAHU, SPECIAL, type Block, type Guide } from '../namaz_more';
 import { useState } from 'react';
 import { toBn } from '../calendar';
 import { useNoor } from '../context';
@@ -9,6 +10,16 @@ import {
   FARZ_OUTSIDE,
   KALEMAS,
   KALEMA_NOTE,
+  JANAZA_DUAS,
+  JANAZA_FARZ,
+  JANAZA_INTRO,
+  JANAZA_MORE,
+  JANAZA_NIYAT_MALE,
+  JANAZA_NIYAT_NOTE,
+  JANAZA_NOTES,
+  JANAZA_SHART,
+  JANAZA_STEPS,
+  JANAZA_SUNNAH,
   NIYATS,
   NIYAT_NOTE,
   RAKATS,
@@ -21,12 +32,16 @@ import {
   type Recite,
 } from '../namaz';
 
-type Part = 'steps' | 'niyat' | 'kalema' | 'rakat' | 'wudu';
+type Part = 'steps' | 'niyat' | 'kalema' | 'janaza' | 'eid' | 'sahu' | 'special' | 'rakat' | 'wudu';
 
 const PARTS: { id: Part; label: string }[] = [
   { id: 'steps', label: 'নামাজের নিয়ম' },
   { id: 'niyat', label: 'নিয়ত' },
   { id: 'kalema', label: 'কালেমা' },
+  { id: 'janaza', label: 'জানাজা' },
+  { id: 'eid', label: 'ঈদ' },
+  { id: 'sahu', label: 'সাহু সিজদা' },
+  { id: 'special', label: 'বিশেষ নামাজ' },
   { id: 'rakat', label: 'রাকাত' },
   { id: 'wudu', label: 'ওজু' },
 ];
@@ -46,7 +61,7 @@ export function NamazShikkha() {
         ))}
       </div>
 
-      {(part === 'steps' || part === 'niyat' || part === 'kalema' || part === 'wudu') && (
+      {(part === 'steps' || part === 'niyat' || part === 'kalema' || part === 'janaza' || part === 'eid' || part === 'sahu' || part === 'special' || part === 'wudu') && (
         <div className="n-namaz__tools">
           <button className={`n-chip ${say ? 'is-on' : ''}`} onClick={() => setSay((v) => !v)} lang="bn">
             উচ্চারণ {say ? 'লুকান' : 'দেখান'}
@@ -57,6 +72,10 @@ export function NamazShikkha() {
       {part === 'steps' && <Steps say={say} />}
       {part === 'niyat' && <Niyats say={say} />}
       {part === 'kalema' && <Kalemas say={say} />}
+      {part === 'janaza' && <Janaza say={say} />}
+      {part === 'eid' && <GuideView g={EID} say={say} />}
+      {part === 'sahu' && <GuideView g={SAHU} say={say} />}
+      {part === 'special' && <Special say={say} />}
       {part === 'rakat' && <Rakats />}
       {part === 'wudu' && <Wudu say={say} />}
     </div>
@@ -196,6 +215,213 @@ function Kalemas({ say }: { say: boolean }) {
         <NIcon name="info" size={14} /> {KALEMA_NOTE}
       </p>
     </>
+  );
+}
+
+function Janaza({ say }: { say: boolean }) {
+  return (
+    <>
+      <p className="n-namaz__intro" lang="bn">
+        {JANAZA_INTRO}
+      </p>
+
+      <section className="n-namaz__card">
+        <h3 lang="bn">জানাজার ২ ফরজ</h3>
+        <ol lang="bn">
+          {JANAZA_FARZ.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="n-namaz__card">
+        <h3 lang="bn">শর্ত</h3>
+        <ul lang="bn">
+          {JANAZA_SHART.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="n-namaz__card">
+        <h3 lang="bn">জানাজার নিয়ত</h3>
+        <RecitePane r={JANAZA_NIYAT_MALE} say={say} />
+        <p className="n-namaz__note" lang="bn">
+          <NIcon name="info" size={14} /> {JANAZA_NIYAT_NOTE}
+        </p>
+      </section>
+
+      <h3 className="n-namaz__h" lang="bn">
+        নামাজ পড়ার নিয়ম — ধাপে ধাপে
+      </h3>
+      <ol className="n-namaz__steps">
+        {JANAZA_STEPS.map((s, i) => (
+          <li key={s.title} className="n-namaz__step">
+            <header>
+              <span className="n-namaz__num">{toBn(i + 1)}</span>
+              <strong lang="bn">{s.title}</strong>
+            </header>
+            <p className="n-namaz__body" lang="bn">
+              {s.body}
+            </p>
+            {s.recite?.map((r) => <RecitePane key={r.ar} r={r} say={say} />)}
+          </li>
+        ))}
+      </ol>
+
+      <h3 className="n-namaz__h" lang="bn">
+        তৃতীয় তাকবিরের পর মৃতের জন্য দোয়া
+      </h3>
+      {JANAZA_DUAS.map((d) => (
+        <article key={d.for} className="n-dua">
+          <header className="n-dua__head">
+            <strong lang="bn">{d.for}</strong>
+          </header>
+          <RecitePane r={d} say={say} />
+          <p className="n-namaz__src" lang="bn">
+            সূত্র: {d.source}
+          </p>
+        </article>
+      ))}
+
+      <section className="n-namaz__card">
+        <h3 lang="bn">সুন্নত ও আদব</h3>
+        <ul lang="bn">
+          {JANAZA_SUNNAH.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="n-namaz__card">
+        <h3 lang="bn">জরুরি মাসআলা</h3>
+        <ul lang="bn">
+          {JANAZA_NOTES.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </section>
+
+      <h3 className="n-namaz__h" lang="bn">
+        মৃত্যু, দাফন ও কবর জিয়ারতের দোয়া
+      </h3>
+      {JANAZA_MORE.map((m) => (
+        <article key={m.title} className="n-dua">
+          <header className="n-dua__head">
+            <strong lang="bn">{m.title}</strong>
+          </header>
+          <p className="n-namaz__body" lang="bn">
+            {m.when}
+          </p>
+          <RecitePane r={m.r} say={say} />
+        </article>
+      ))}
+    </>
+  );
+}
+
+function BlockView({ b, say }: { b: Block; say: boolean }) {
+  switch (b.kind) {
+    case 'intro':
+      return (
+        <p className="n-namaz__intro" lang="bn">
+          {b.text}
+        </p>
+      );
+    case 'note':
+      return (
+        <p className="n-namaz__note" lang="bn">
+          <NIcon name="info" size={14} /> {b.text}
+        </p>
+      );
+    case 'list': {
+      const L = b.ordered ? 'ol' : 'ul';
+      return (
+        <section className="n-namaz__card">
+          <h3 lang="bn">{b.title}</h3>
+          <L lang="bn">
+            {b.items.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </L>
+        </section>
+      );
+    }
+    case 'recite':
+      return (
+        <article className="n-dua">
+          <header className="n-dua__head">
+            <strong lang="bn">{b.title}</strong>
+          </header>
+          <RecitePane r={b.r} say={say} />
+          {b.note && (
+            <p className="n-namaz__src" lang="bn">
+              {b.note}
+            </p>
+          )}
+          {b.source && (
+            <p className="n-namaz__src" lang="bn">
+              সূত্র: {b.source}
+            </p>
+          )}
+        </article>
+      );
+    case 'steps':
+      return (
+        <>
+          <h3 className="n-namaz__h" lang="bn">
+            {b.title}
+          </h3>
+          <ol className="n-namaz__steps">
+            {b.steps.map((st, i) => (
+              <li key={st.title} className="n-namaz__step">
+                <header>
+                  <span className="n-namaz__num">{toBn(i + 1)}</span>
+                  <strong lang="bn">{st.title}</strong>
+                </header>
+                <p className="n-namaz__body" lang="bn">
+                  {st.body}
+                </p>
+                {st.recite?.map((r) => <RecitePane key={r.ar} r={r} say={say} />)}
+              </li>
+            ))}
+          </ol>
+        </>
+      );
+  }
+}
+
+function GuideView({ g, say }: { g: Guide; say: boolean }) {
+  return (
+    <>
+      {g.blocks.map((b, i) => (
+        <BlockView key={i} b={b} say={say} />
+      ))}
+    </>
+  );
+}
+
+function Special({ say }: { say: boolean }) {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <div className="n-namaz__special">
+      {SPECIAL.map((g) => (
+        <section key={g.id} className={`n-namaz__acc${open === g.id ? ' is-open' : ''}`}>
+          <button className="n-namaz__acchead" onClick={() => setOpen((o) => (o === g.id ? null : g.id))} aria-expanded={open === g.id}>
+            <span>
+              <strong lang="bn">{g.title}</strong>
+              <small lang="bn">{g.sub}</small>
+            </span>
+            <NIcon name="chevronRight" size={18} />
+          </button>
+          {open === g.id && (
+            <div className="n-namaz__accbody">
+              <GuideView g={g} say={say} />
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
   );
 }
 

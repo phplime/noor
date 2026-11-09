@@ -10509,7 +10509,7 @@ html.n-still .n-opt__spin {
   align-items: center;
   padding: 9px 0;
 }
-.n-fit__walks li + li { border-top: 1px solid var(--n-line, rgba(0, 0, 0, 0.07)); }
+.n-fit__walks li + li { border-top: 1px solid var(--n-card-border); }
 .n-fit__walks span { display: flex; flex-direction: column; min-width: 0; }
 .n-fit__walks small { font-size: 11.5px; opacity: 0.6; }
 
@@ -10551,3 +10551,49 @@ html.n-still .n-opt__spin {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+/* নামাজ শিক্ষা › জানাজা */
+.n-namaz__h {
+  margin: 22px 4px 10px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.n-namaz__src {
+  margin: 8px 0 0;
+  font-size: 12px;
+  opacity: 0.6;
+}
+.n-namaz .n-dua > .n-namaz__body { margin: 0 0 6px; }
+
+/* নামাজ শিক্ষা › বিশেষ নামাজ (accordion) */
+.n-namaz__special { display: flex; flex-direction: column; gap: 10px; }
+.n-namaz__acc {
+  border-radius: 20px;
+  background: var(--n-surface);
+  border: 1px solid var(--n-card-border);
+  box-shadow: var(--n-shadow);
+  color: inherit;
+  overflow: hidden;
+}
+.n-namaz__acchead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.n-namaz__acchead > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.n-namaz__acchead strong { font-size: 15.5px; }
+.n-namaz__acchead small { font-size: 12.5px; opacity: 0.65; }
+.n-namaz__acchead svg { flex: none; opacity: 0.5; transition: transform 0.2s; }
+.n-namaz__acc.is-open .n-namaz__acchead svg { transform: rotate(90deg); }
+.n-namaz__accbody { padding: 0 12px 14px; }
+.n-namaz__accbody .n-namaz__card,
+.n-namaz__accbody .n-dua { box-shadow: none; background: rgba(127, 127, 127, 0.08); border-color: transparent; }

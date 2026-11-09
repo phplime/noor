@@ -38,6 +38,7 @@ src-tauri/gen/apple/Pods/
 *.orig
 
 # Local junk
+.updates/
 _to_delete/
 *.tgz
 *.tar.gz

@@ -288,6 +288,68 @@ pub fn output_size(img_w: u32, img_h: u32, q: &Quad, aspect: Option<f64>) -> (u3
     }
 }
 
+/// Cut off dark strips left along the edges of a straightened card (table, shadow or the
+/// laminate's edge when the corners sat a little outside the card). Looks at each side and
+/// steps inward while that row/column is clearly darker than the card itself — at most 7%
+/// per side — then scales the rest back to the same size.
+pub fn trim_dark_edges(img: &RgbaImage) -> RgbaImage {
+    let (w, h) = img.dimensions();
+    if w < 40 || h < 40 {
+        return img.clone();
+    }
+    let luma = |x: u32, y: u32| {
+        let p = img.get_pixel(x, y);
+        0.299 * p[0] as f64 + 0.587 * p[1] as f64 + 0.114 * p[2] as f64
+    };
+    // Typical brightness of the card: median of a central patch.
+    let mut centre: Vec<f64> = Vec::new();
+    let (sx, sy) = ((w / 40).max(1), (h / 40).max(1));
+    for y in (h / 4..h * 3 / 4).step_by(sy as usize) {
+        for x in (w / 4..w * 3 / 4).step_by(sx as usize) {
+            centre.push(luma(x, y));
+        }
+    }
+    centre.sort_by(|a, b| a.total_cmp(b));
+    let card = centre[centre.len() / 2];
+    // A line counts as "edge junk" when most of it is much darker than the card.
+    let dark = card * 0.72;
+    let row_dark = |y: u32| {
+        let n = (w * 8 / 10).max(1);
+        let d = (w / 10..w / 10 + n).filter(|&x| luma(x, y) < dark).count();
+        d as f64 / n as f64 > 0.5
+    };
+    let col_dark = |x: u32| {
+        let n = (h * 8 / 10).max(1);
+        let d = (h / 10..h / 10 + n).filter(|&y| luma(x, y) < dark).count();
+        d as f64 / n as f64 > 0.5
+    };
+    let (mx, my) = (w * 7 / 100, h * 7 / 100);
+    let mut top = 0;
+    while top < my && row_dark(top) {
+        top += 1;
+    }
+    let mut bottom = 0;
+    while bottom < my && row_dark(h - 1 - bottom) {
+        bottom += 1;
+    }
+    let mut left = 0;
+    while left < mx && col_dark(left) {
+        left += 1;
+    }
+    let mut right = 0;
+    while right < mx && col_dark(w - 1 - right) {
+        right += 1;
+    }
+    if top + bottom + left + right == 0 {
+        return img.clone();
+    }
+    // One extra pixel for the soft (anti-aliased) edge.
+    let pad = |v: u32, m: u32| if v > 0 { (v + 2).min(m) } else { 0 };
+    let (top, bottom, left, right) = (pad(top, my), pad(bottom, my), pad(left, mx), pad(right, mx));
+    let cropped = image::imageops::crop_imm(img, left, top, w - left - right, h - top - bottom).to_image();
+    image::imageops::resize(&cropped, w, h, image::imageops::FilterType::Lanczos3)
+}
+
 /// Pull the corners a little toward the middle (`f` = fraction of the card's size) so no
 /// sliver of the table survives along the edges.
 pub fn inset_quad(q: &Quad, f: f64) -> Quad {
@@ -437,6 +499,24 @@ mod tests {
         let (img, q) = card_photo();
         let (w, h) = output_size(img.width(), img.height(), &q, Some(85.6 / 54.0));
         assert!(((w as f64 / h as f64) - 85.6 / 54.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn trims_dark_strips() {
+        // Light card with a dark band on the left (6%) and top (4%).
+        let (w, h) = (500u32, 315u32);
+        let img = RgbaImage::from_fn(w, h, |x, y| if x < 30 || y < 12 { Rgba([30, 30, 30, 255]) } else { Rgba([230, 228, 220, 255]) });
+        let out = trim_dark_edges(&img);
+        assert_eq!(out.dimensions(), (w, h));
+        for (x, y) in [(0, h / 2), (w / 2, 0), (2, 2)] {
+            assert!(out.get_pixel(x, y)[0] > 180, "pixel {x},{y} still dark: {:?}", out.get_pixel(x, y));
+        }
+    }
+
+    #[test]
+    fn keeps_a_clean_card() {
+        let img = RgbaImage::from_pixel(400, 250, Rgba([220, 220, 220, 255]));
+        assert_eq!(trim_dark_edges(&img), img);
     }
 
     #[test]

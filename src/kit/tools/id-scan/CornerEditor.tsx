@@ -140,6 +140,14 @@ export function CornerEditor({
           Whole photo
         </button>
       </footer>
+      <footer className="idscan-review__actions idscan-editor__done">
+        <button className="btn large" onClick={onCancel} disabled={busy}>
+          Cancel
+        </button>
+        <button className="btn primary large" onClick={() => onDone(q)} disabled={busy}>
+          {busy ? 'Straightening…' : '✓ Done'}
+        </button>
+      </footer>
     </div>
   );
 }

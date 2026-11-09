@@ -64,6 +64,8 @@ scopeCss.postcss = true;
 export default defineConfig({
   plugins: [react() as VitePlugin[]],
   clearScreen: false,
+  // Shown in About next to the version, so a test build is easy to tell apart.
+  define: { __BUILD_TIME__: JSON.stringify(new Date().toISOString()) },
   css: { postcss: { plugins: [scopeCss()] } },
   server: {
     port: 1440,

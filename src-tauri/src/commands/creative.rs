@@ -181,7 +181,7 @@ pub async fn idscan_straighten(
         // A hair inside the corners: no sliver of the table along the edges.
         let q = mackit_core::docscan::inset_quad(&mackit_core::docscan::order_quad(corners), 0.012);
         let (w, h) = mackit_core::docscan::output_size(img.width(), img.height(), &q, aspect.filter(|a| *a > 0.1 && *a < 10.0));
-        let mut out = mackit_core::docscan::warp(&img, &q, w, h);
+        let mut out = mackit_core::docscan::trim_dark_edges(&mackit_core::docscan::warp(&img, &q, w, h));
         if enhance {
             mackit_core::docscan::enhance(&mut out);
         }

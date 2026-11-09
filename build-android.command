@@ -9,6 +9,7 @@ APK="release/Noor-v$VERSION-android.apk"
 mkdir -p release
 {
   print "=== Noor v$VERSION — Android build — $(date)"
+  if [[ -z "$NOOR_NO_UPDATES" ]]; then zsh scripts/apply-updates.sh || { print "✖ Could not apply updates"; exit 1; }; fi
   [[ -f src-tauri/gen/android/keystore.properties ]] || { print "✖ Missing src-tauri/gen/android/keystore.properties (signing key settings)."; exit 1; }
   npm run tauri android build -- --apk --target aarch64 &&
   cp src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk "$APK" || { print "✖ Android build failed"; exit 1; }

@@ -631,6 +631,8 @@ mockIPC(
         return { corners: [{ x: 0.12, y: 0.14 }, { x: 0.86, y: 0.1 }, { x: 0.9, y: 0.84 }, { x: 0.1, y: 0.88 }], found: true, width: 1600, height: 1067 };
       case 'idscan_straighten':
         return `/mock/scan-card-${Date.now()}.jpg`;
+      case 'capture_card':
+        return { paths: [`/mock/scan-photo-${Date.now()}.jpg`] };
       case 'scan_document':
         return { paths: ['/mock/scan-front.jpg', '/mock/scan-back.jpg'] };
       case 'scan_inputs': {

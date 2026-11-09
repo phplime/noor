@@ -2380,3 +2380,7 @@ kbd {
   width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
   background: #2fb27f; color: #fff; font-size: 28px; font-weight: 800;
 }
+/* Review / corner screens sit above the whole app (portal to <body>). */
+.idscan-editor { z-index: 100000; }
+.idscan-editor__done { grid-template-columns: 1fr 1.4fr; padding-top: 4px; }
+.idscan-editor__tools { padding-bottom: 4px; }

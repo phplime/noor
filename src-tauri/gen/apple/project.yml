@@ -57,8 +57,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 0.1.1
-        CFBundleVersion: "0.1.1"
+        CFBundleShortVersionString: 0.1.2
+        CFBundleVersion: "0.1.2"
         NSSupportsLiveActivities: true
         UIBackgroundModes: [audio]
         NSMotionUsageDescription: Noor counts your daily steps for the Fitness section. Step data stays on your iPhone.
@@ -127,8 +127,8 @@ targets:
       path: NoorWidget/Info.plist
       properties:
         CFBundleDisplayName: Noor
-        CFBundleShortVersionString: 0.1.1
-        CFBundleVersion: "0.1.1"
+        CFBundleShortVersionString: 0.1.2
+        CFBundleVersion: "0.1.2"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
