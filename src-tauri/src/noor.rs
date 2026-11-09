@@ -366,6 +366,24 @@ pub fn fitness_set_steps(app: AppHandle, state: State<'_, AppState>, date: Strin
     fitness_store(&app, &state, data)
 }
 
+/// Fitness › Start live: count a walk from `from_ms` (when it started, ms since 1970) on the
+/// iPhone's motion chip. Stopped by `fitness_live_stop`.
+#[tauri::command]
+pub fn fitness_live_start(from_ms: f64) {
+    crate::ios_motion::live_start(from_ms / 1000.0);
+}
+
+#[tauri::command]
+pub fn fitness_live_stop() {
+    crate::ios_motion::live_stop();
+}
+
+/// Latest live reading for the walk: steps, distance, current speed and cadence. `{}` when unavailable.
+#[tauri::command]
+pub fn fitness_live() -> serde_json::Value {
+    crate::ios_motion::live()
+}
+
 /// Pull the last week's step counts from the iPhone's motion chip (no-op elsewhere).
 #[tauri::command]
 pub async fn fitness_sync_steps(app: AppHandle, state: State<'_, AppState>) -> R<FitnessOverview> {

@@ -17,6 +17,7 @@ import { adjustTool } from '../tools/adjust/definition';
 import { backgroundTool } from '../tools/background/definition';
 import { notesTool } from '../tools/notes/definition';
 import { collageTool } from '../tools/collage/definition';
+import { idScanTool } from '../tools/id-scan/definition';
 import { facebookPostTool } from '../tools/facebook-post/definition';
 import { settingsPage, aboutPage, futureToolsPage } from '../tools/app-pages/definition';
 
@@ -31,6 +32,7 @@ export const TOOLS: ToolDefinition[] = [
   adjustTool,
   backgroundTool,
   collageTool,
+  idScanTool,
   facebookPostTool,
   notesTool,
   settingsPage,

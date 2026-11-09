@@ -137,3 +137,160 @@ export function useFitness(syncOnOpen = false) {
   }, [reload, syncOnOpen]);
   return { data, setData, reload };
 }
+
+// ----- Live walk (Fitness › Start live) -----
+
+export interface LiveReading {
+  /** steps since the walk started */
+  steps: number;
+  /** metres since the walk started (null = the iPhone didn't measure it) */
+  distanceM: number | null;
+  /** current speed, m/s (0 when standing still) */
+  speedMps: number;
+  /** steps per minute right now */
+  cadence: number;
+}
+
+export interface WalkSession {
+  /** ms since 1970 */
+  startMs: number;
+  /** today's step total when the walk started */
+  baseSteps: number;
+}
+
+export interface WalkRecord {
+  start: number;
+  end: number;
+  steps: number;
+  km: number;
+  kcal: number;
+  avgKmh: number;
+}
+
+const WALK_KEY = 'noor.walk.v1';
+const WALKS_KEY = 'noor.walks.v1';
+
+function readJSON<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function writeJSON(key: string, v: unknown) {
+  try {
+    if (v == null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(v));
+  } catch {
+    /* storage full / unavailable */
+  }
+}
+
+export const recentWalks = (): WalkRecord[] => readJSON<WalkRecord[]>(WALKS_KEY, []);
+/** The walk in progress, if any (for the Home shortcut). */
+export const currentWalk = (): WalkSession | null => readJSON<WalkSession | null>(WALK_KEY, null);
+
+const AUTOSTART_KEY = 'noor.walk.autostart';
+/** Home › Start live walk: ask the Fitness screen to start a walk as soon as it opens. */
+export function requestWalkStart() {
+  try {
+    sessionStorage.setItem(AUTOSTART_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+}
+/** True once, if Home asked for a walk to start. */
+export function takeWalkStart(): boolean {
+  try {
+    const v = sessionStorage.getItem(AUTOSTART_KEY) === '1';
+    sessionStorage.removeItem(AUTOSTART_KEY);
+    return v;
+  } catch {
+    return false;
+  }
+}
+
+interface RawLive {
+  steps?: number;
+  distanceM?: number;
+  speedMps?: number;
+  cadence?: number;
+}
+
+/**
+ * A live walk that counts from zero. Runs only while the Fitness screen is on screen; if you
+ * leave or lock the phone, it picks up the full count again when you come back (the iPhone keeps
+ * counting steps in its motion chip). The walk survives closing the app until you press End.
+ */
+export function useLiveWalk(supported: boolean) {
+  const [walk, setWalk] = useState<WalkSession | null>(() => (supported ? readJSON<WalkSession | null>(WALK_KEY, null) : null));
+  const [reading, setReading] = useState<LiveReading | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!walk) return;
+    let timer: number | undefined;
+    let running = false;
+    const read = () => {
+      setNow(Date.now());
+      invoke<RawLive>('fitness_live')
+        .then((r) => {
+          if (typeof r?.steps !== 'number') return;
+          setReading({ steps: r.steps, distanceM: r.distanceM ?? null, speedMps: Math.max(0, r.speedMps ?? 0), cadence: Math.max(0, r.cadence ?? 0) });
+        })
+        .catch(() => undefined);
+    };
+    const start = () => {
+      if (running) return;
+      running = true;
+      void invoke('fitness_live_start', { fromMs: walk.startMs }).catch(() => undefined);
+      read();
+      timer = window.setInterval(read, 1000);
+    };
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      window.clearInterval(timer);
+      void invoke('fitness_live_stop').catch(() => undefined);
+    };
+    const onVis = () => (document.visibilityState === 'visible' ? start() : stop());
+    if (document.visibilityState === 'visible') start();
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      stop();
+    };
+  }, [walk]);
+
+  const begin = useCallback((todaySteps: number) => {
+    const w = { startMs: Date.now(), baseSteps: todaySteps };
+    writeJSON(WALK_KEY, w);
+    setReading({ steps: 0, distanceM: 0, speedMps: 0, cadence: 0 });
+    setNow(w.startMs);
+    setWalk(w);
+  }, []);
+
+  /** End the walk: save it to the history and add its steps to today (re-read from the iPhone). */
+  const end = useCallback(
+    async (record: Omit<WalkRecord, 'start' | 'end'>) => {
+      if (!walk) return null;
+      const rec: WalkRecord = { ...record, start: walk.startMs, end: Date.now() };
+      if (rec.steps > 0) writeJSON(WALKS_KEY, [rec, ...recentWalks()].slice(0, 30));
+      writeJSON(WALK_KEY, null);
+      setWalk(null);
+      setReading(null);
+      await invoke('fitness_live_stop').catch(() => undefined);
+      return fit.sync().catch(() => null);
+    },
+    [walk],
+  );
+
+  const elapsedS = walk ? Math.max(0, Math.round((now - walk.startMs) / 1000)) : 0;
+  return { walk, reading, elapsedS, begin, end };
+}
+
+/** Same estimate as the Rust summary: ≈0.04 kcal per step for 70 kg, scaled by body weight. */
+export const stepKcal = (steps: number, kg: number | null) => Math.round((steps * 0.04 * (kg ?? 65)) / 70);
+/** Stride ≈ 0.415 × height. */
+export const stepKm = (steps: number, heightCm: number) => (steps * (heightCm || 165) * 0.415) / 100_000;

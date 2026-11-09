@@ -19,6 +19,7 @@ pub mod background;
 pub mod batch;
 pub mod codec;
 pub mod collage;
+pub mod docscan;
 pub mod color;
 pub mod error;
 pub mod export;

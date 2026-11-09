@@ -617,8 +617,28 @@ mockIPC(
         });
       case 'plugin:dialog|open':
         return (a.options as { multiple?: boolean } | undefined)?.multiple ? [SAMPLE_FILE.path] : SAMPLE_FILE.path;
-      case 'scan_inputs':
-        return { files: [SAMPLE_FILE], skipped: [], truncated: false };
+      case 'fitness_live_start':
+        (globalThis as { __walkStart?: number }).__walkStart = (a.fromMs as number) ?? Date.now();
+        return null;
+      case 'fitness_live_stop':
+        return null;
+      case 'fitness_live': {
+        const t = (Date.now() - ((globalThis as { __walkStart?: number }).__walkStart ?? Date.now())) / 1000;
+        const steps = Math.floor(t * 1.8);
+        return { steps, distanceM: steps * 0.71, speedMps: t > 2 ? 1.35 + 0.1 * Math.sin(t / 5) : 0, cadence: 108, age: 1 };
+      }
+      case 'idscan_detect':
+        return { corners: [{ x: 0.12, y: 0.14 }, { x: 0.86, y: 0.1 }, { x: 0.9, y: 0.84 }, { x: 0.1, y: 0.88 }], found: true, width: 1600, height: 1067 };
+      case 'idscan_straighten':
+        return `/mock/scan-card-${Date.now()}.jpg`;
+      case 'scan_document':
+        return { paths: ['/mock/scan-front.jpg', '/mock/scan-back.jpg'] };
+      case 'scan_inputs': {
+        const ps = (a.paths as string[] | undefined) ?? [];
+        const scans = ps.filter((x) => x.startsWith('/mock/scan-'));
+        const files = scans.length ? scans.map((x) => ({ ...SAMPLE_FILE, path: x, name: x.split('/').pop() as string, width: 1600, height: 1009 })) : [SAMPLE_FILE];
+        return { files, skipped: [], truncated: false };
+      }
       case 'thumbnail':
         return { dataUrl: sample(), width: 1600, height: 1067, hasAlpha: false };
       case 'render_preview':

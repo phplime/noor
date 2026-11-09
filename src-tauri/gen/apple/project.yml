@@ -57,12 +57,13 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 0.1.0
-        CFBundleVersion: "0.1.0"
+        CFBundleShortVersionString: 0.1.1
+        CFBundleVersion: "0.1.1"
         NSSupportsLiveActivities: true
         UIBackgroundModes: [audio]
         NSMotionUsageDescription: Noor counts your daily steps for the Fitness section. Step data stays on your iPhone.
         NSAlarmKitUsageDescription: Noor rings reminders you mark as alarms at their exact time, until you press Stop.
+        NSCameraUsageDescription: Noor uses the camera to scan your NID card or passport in Studio. Scans stay on your iPhone.
         NSPhotoLibraryUsageDescription: Noor's Optimize tool scans your photos for screenshots, large videos and duplicates. Nothing leaves your iPhone and nothing is deleted unless you choose it.
     entitlements:
       path: noor_iOS/noor_iOS.entitlements
@@ -97,6 +98,8 @@ targets:
       - sdk: ActivityKit.framework
         weak: true
       - sdk: CoreMotion.framework
+      - sdk: VisionKit.framework
+      - sdk: Vision.framework
       - sdk: Photos.framework
       - sdk: AVFoundation.framework
       - sdk: AlarmKit.framework
@@ -124,8 +127,8 @@ targets:
       path: NoorWidget/Info.plist
       properties:
         CFBundleDisplayName: Noor
-        CFBundleShortVersionString: 0.1.0
-        CFBundleVersion: "0.1.0"
+        CFBundleShortVersionString: 0.1.1
+        CFBundleVersion: "0.1.1"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

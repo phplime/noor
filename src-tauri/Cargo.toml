@@ -1,6 +1,6 @@
 [package]
 name = "noor"
-version = "0.1.0"
+version = "0.1.1"
 description = "Noor — prayer times, reminders and photo tools for iPhone (MacKit + Nexa Island)"
 authors = ["Nazmul"]
 edition.workspace = true

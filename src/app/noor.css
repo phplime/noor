@@ -10366,3 +10366,188 @@ html.n-still .n-opt__spin {
 
 /* placeholder while a screen's code loads (a few ms, usually never seen) */
 .n-lazy { min-height: 60vh; }
+
+/* Fitness › live speed / distance / calories (inside the green steps card) */
+.n-fit__live {
+  grid-column: 1 / -1;
+  position: relative;
+  margin-top: 14px;
+  padding: 16px 10px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.09);
+}
+.n-fit__livegrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+.n-fit__livegrid > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.n-fit__livegrid > div + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+.n-fit__livegrid small {
+  font-size: 11px;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+.n-fit__livegrid b {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.n-fit__livegrid em {
+  font-style: normal;
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.n-fit__livebadge {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #0f3b3d;
+  border: 1px solid rgba(143, 240, 196, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  color: #8ff0c4;
+}
+.n-fit__livebadge i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8ff0c4;
+  opacity: 0.6;
+}
+.n-fit__livebadge.is-moving i {
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(143, 240, 196, 0.25);
+}
+
+.n-fit__livegrid--4 { grid-template-columns: repeat(4, 1fr); }
+.n-fit__livegrid--4 b { font-size: 21px; }
+.n-fit__livehead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 2px 10px;
+}
+.n-fit__livehead > b {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.n-fit__live .n-fit__livebadge { position: static; }
+.n-fit__livebtn {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.n-fit__livebtn.is-start {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  text-align: left;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #fff;
+  color: #0f3b3d;
+  font-size: 16px;
+  font-weight: 800;
+}
+.n-fit__livebtn.is-start span {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1d6b55;
+  color: #fff;
+  font-size: 13px;
+}
+.n-fit__livebtn.is-start small {
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+.n-fit__livebtn.is-end {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #b4232c;
+  font-size: 13px;
+  font-weight: 800;
+}
+.n-fit__walks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.n-fit__walks li {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 0.8fr;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 0;
+}
+.n-fit__walks li + li { border-top: 1px solid var(--n-line, rgba(0, 0, 0, 0.07)); }
+.n-fit__walks span { display: flex; flex-direction: column; min-width: 0; }
+.n-fit__walks small { font-size: 11.5px; opacity: 0.6; }
+
+/* Home › Start live walk (full-width row) */
+.n-app .n-short--walk {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  padding: 12px 14px;
+  color: #fff;
+  border: 0;
+  background: linear-gradient(120deg, #1d6b55, #0f3b3d);
+}
+.n-short--walk .n-short__icon {
+  position: static;
+  flex: none;
+  background: #fff !important;
+  color: #1d6b55 !important;
+}
+.n-short--walk .n-short__label {
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.n-short--walk.is-on .n-short__label { display: none; }
+.n-short__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2fb27f;
+  box-shadow: 0 0 0 4px rgba(47, 178, 127, 0.25);
+}
+.n-short__walktime {
+  flex: none;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

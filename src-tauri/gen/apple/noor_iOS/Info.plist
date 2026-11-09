@@ -15,13 +15,15 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>0.1.1</string>
 	<key>CFBundleVersion</key>
-	<string>0.1.0</string>
+	<string>0.1.1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Noor rings reminders you mark as alarms at their exact time, until you press Stop.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Noor uses the camera to scan your NID card or passport in Studio. Scans stay on your iPhone.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Noor counts your daily steps for the Fitness section. Step data stays on your iPhone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

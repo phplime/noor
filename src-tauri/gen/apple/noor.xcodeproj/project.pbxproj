@@ -9,9 +9,11 @@
 /* Begin PBXBuildFile section */
 		0213A8F2F9CAB0B7F55A5C27 /* NoorWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741F0214F2A9A74637790732 /* NoorWidgetBundle.swift */; };
 		0929A11E987A6B379FBC67A3 /* NoorVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ADB7F52BF93EF8BAF9FF4C2 /* NoorVoice.swift */; };
+		0EE09C7C3DE4DCFAEA527C5E /* VisionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 022F41FB6B3109D122BC7B53 /* VisionKit.framework */; };
 		0F662A19A293349794C5043D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 049D61929C33F4BFAC2C8F37 /* Security.framework */; };
 		12F32B11C8C0EE25C4982BD6 /* NoorLive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C729DAECBF9777223F48F2 /* NoorLive.swift */; };
 		1357A5DBABC525E13967E932 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D3285F441E18CE72E4638FE /* UIKit.framework */; };
+		1E539C9382C50925B8049E75 /* NoorScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192E1D3447E6D9B0047F80D7 /* NoorScan.swift */; };
 		2097C77555250F7ABFA391CA /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C84E2842E299E0298E4298D2 /* AVFoundation.framework */; };
 		218AC38221059623C7E94CC5 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 1BB6ED061B055F7A3B683F64 /* assets */; };
 		30C069D05C780B7D3A5136A0 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796330516B5C8621867C212D /* CoreMotion.framework */; };
@@ -31,6 +33,7 @@
 		C15E59B4D26172BD3B2951A5 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 35EED7478FB307562FCD9A58 /* Photos.framework */; };
 		C778F8AF234BA02CED09C3C3 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D04375EC03D8B44A7FBBED96 /* Metal.framework */; };
 		CB828B5C5374A16DF794D32C /* NoorPrayerAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2C22AC71D95464541469D4 /* NoorPrayerAttributes.swift */; };
+		D5B45F10D88584B115AC3B53 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FECE8800C4AF13FAB38F3866 /* Vision.framework */; };
 		DA1A004923765022CE601720 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 928BB353968CA4CE4C607F86 /* CoreGraphics.framework */; };
 		DD9EA0F81DDA224E7F3727B1 /* NoorWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 010A42699704DBAC0C8942ED /* NoorWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E5AE35D1CE5854A3E07075DE /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E03BEB33B44BA0CC45795D44 /* WebKit.framework */; };
@@ -66,10 +69,12 @@
 
 /* Begin PBXFileReference section */
 		010A42699704DBAC0C8942ED /* NoorWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NoorWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		022F41FB6B3109D122BC7B53 /* VisionKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VisionKit.framework; path = System/Library/Frameworks/VisionKit.framework; sourceTree = SDKROOT; };
 		049D61929C33F4BFAC2C8F37 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		058D3A59F616D62AD6F2D3A6 /* notes.rs */ = {isa = PBXFileReference; path = notes.rs; sourceTree = "<group>"; };
 		0DAC298B6D3EB16C9EEE9613 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		0E506E91C6CD233374138DFD /* AlarmKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlarmKit.framework; path = System/Library/Frameworks/AlarmKit.framework; sourceTree = SDKROOT; };
+		192E1D3447E6D9B0047F80D7 /* NoorScan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorScan.swift; sourceTree = "<group>"; };
 		1A197E4378CB5BEF8ECD4FF9 /* libapp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libapp.a; sourceTree = "<group>"; };
 		1BB6ED061B055F7A3B683F64 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = SOURCE_ROOT; };
 		1F104D6A072461C84D042DD4 /* prayer_cmds.rs */ = {isa = PBXFileReference; path = prayer_cmds.rs; sourceTree = "<group>"; };
@@ -87,6 +92,7 @@
 		628B8A2B18897A2F92BE1B04 /* main.rs */ = {isa = PBXFileReference; path = main.rs; sourceTree = "<group>"; };
 		63A7DEEAC7089E2C7F318996 /* NoorPrayerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorPrayerLiveActivity.swift; sourceTree = "<group>"; };
 		68EA840AC502F7F6D27E00EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6D2D52B60B641CA6C04724AE /* ios_scan.rs */ = {isa = PBXFileReference; path = ios_scan.rs; sourceTree = "<group>"; };
 		741F0214F2A9A74637790732 /* NoorWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorWidgetBundle.swift; sourceTree = "<group>"; };
 		779D94687C58F140A22FBCCD /* macos.rs */ = {isa = PBXFileReference; path = macos.rs; sourceTree = "<group>"; };
 		796330516B5C8621867C212D /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
@@ -125,6 +131,7 @@
 		F6C8300B9B983963F2149767 /* settings.rs */ = {isa = PBXFileReference; path = settings.rs; sourceTree = "<group>"; };
 		F838F7B4462F8806DFBB414E /* NoorWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoorWatchdog.swift; sourceTree = "<group>"; };
 		FD175F0E4D46C7073908D3F9 /* noor_iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = noor_iOS.entitlements; sourceTree = "<group>"; };
+		FECE8800C4AF13FAB38F3866 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +149,8 @@
 				E5AE35D1CE5854A3E07075DE /* WebKit.framework in Frameworks */,
 				89C36D15D4B21302B1080138 /* ActivityKit.framework in Frameworks */,
 				30C069D05C780B7D3A5136A0 /* CoreMotion.framework in Frameworks */,
+				0EE09C7C3DE4DCFAEA527C5E /* VisionKit.framework in Frameworks */,
+				D5B45F10D88584B115AC3B53 /* Vision.framework in Frameworks */,
 				C15E59B4D26172BD3B2951A5 /* Photos.framework in Frameworks */,
 				2097C77555250F7ABFA391CA /* AVFoundation.framework in Frameworks */,
 				9137B641E8A23CE2E3C93F98 /* AlarmKit.framework in Frameworks */,
@@ -169,6 +178,7 @@
 				A7C729DAECBF9777223F48F2 /* NoorLive.swift */,
 				A54007A44C83CD6AEE890E8D /* NoorMotion.swift */,
 				3F29FD82B17893C20C9FF2F2 /* NoorOptimize.swift */,
+				192E1D3447E6D9B0047F80D7 /* NoorScan.swift */,
 				7ADB7F52BF93EF8BAF9FF4C2 /* NoorVoice.swift */,
 				F838F7B4462F8806DFBB414E /* NoorWatchdog.swift */,
 				3D60D5DEFEBE85F1C1C1541D /* bindings */,
@@ -201,6 +211,7 @@
 				3B503922A668AFABB24538BA /* ios_live.rs */,
 				DE8F18F4F5389B5669214304 /* ios_motion.rs */,
 				7C99F64D046E88F133DC3D47 /* ios_optimize.rs */,
+				6D2D52B60B641CA6C04724AE /* ios_scan.rs */,
 				448450ECD462E82FF1E4CE73 /* ios_share.rs */,
 				E3C5EF058665CFF87B54D670 /* ios_voice.rs */,
 				D5BD334E7E0B25E9EA1CDEE5 /* island_state.rs */,
@@ -299,6 +310,8 @@
 				049D61929C33F4BFAC2C8F37 /* Security.framework */,
 				2FC68EF7877FB5E573749D63 /* SwiftUI.framework */,
 				7D3285F441E18CE72E4638FE /* UIKit.framework */,
+				FECE8800C4AF13FAB38F3866 /* Vision.framework */,
+				022F41FB6B3109D122BC7B53 /* VisionKit.framework */,
 				E03BEB33B44BA0CC45795D44 /* WebKit.framework */,
 				A520BA1737A53C9D77DA3CC0 /* WidgetKit.framework */,
 			);
@@ -324,14 +337,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		"TEMP_32D16EB6-B2E6-40FC-94C6-C6534EED4ABC" /* arm64 */ = {
+		"TEMP_1EE822CE-0AF5-42D2-B68A-7885CCB64316" /* arm64 */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			path = arm64;
 			sourceTree = "<group>";
 		};
-		"TEMP_DC900649-06C9-46EA-9920-22E507BC2095" /* x86_64 */ = {
+		"TEMP_74E14090-AB14-4767-AC25-76BCCE2FF291" /* x86_64 */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -477,6 +490,7 @@
 				F9D0E89073F4A1CAE8A4D537 /* NoorMotion.swift in Sources */,
 				E621DAAD1C568F352C29C7D4 /* NoorOptimize.swift in Sources */,
 				BE24064972EACE231E9A736C /* NoorPrayerAttributes.swift in Sources */,
+				1E539C9382C50925B8049E75 /* NoorScan.swift in Sources */,
 				0929A11E987A6B379FBC67A3 /* NoorVoice.swift in Sources */,
 				F70FF9DF108D842134ACADC1 /* NoorWatchdog.swift in Sources */,
 				38873266F66E0B63B97315D2 /* main.mm in Sources */,

@@ -9,6 +9,7 @@ mod commands;
 mod ios_live;
 mod ios_motion;
 mod ios_optimize;
+mod ios_scan;
 mod ios_voice;
 mod ios_alarm;
 mod voice;
@@ -89,6 +90,9 @@ pub fn run() {
             optimize::optimize_junk_clean,
             optimize::optimize_photos_scan,
             optimize::optimize_photos_delete,
+            ios_scan::scan_document,
+            commands::creative::idscan_detect,
+            commands::creative::idscan_straighten,
             commands::images::thumbnail,
             commands::images::render_preview,
             commands::images::plan_operations,
@@ -179,6 +183,9 @@ pub fn run() {
             noor::fitness_set_steps,
             noor::fitness_sync_steps,
             noor::fitness_motion_available,
+            noor::fitness_live_start,
+            noor::fitness_live_stop,
+            noor::fitness_live,
             noor::fitness_report,
             noor::salah_overview,
             noor::salah_set,

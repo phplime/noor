@@ -491,6 +491,7 @@ pub fn plan_all(state: &IslandState, now: DateTime<Utc>) -> Vec<Planned> {
 static LAST_PLAN: AtomicU64 = AtomicU64::new(0);
 
 /// Make the next re-plan schedule everything even if the plan looks unchanged.
+#[cfg_attr(not(mobile), allow(dead_code))]
 pub fn force_next() {
     LAST_PLAN.store(0, Ordering::SeqCst);
 }

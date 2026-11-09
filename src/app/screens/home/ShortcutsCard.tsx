@@ -5,6 +5,7 @@ import { NIcon } from '../../icons';
 import { DHIKR, loadTasbih, rollDay, saveTasbih, tap, targetOf, type TasbihState } from '../../tasbih';
 import { optimize, type DeviceHealth } from '../../optimize';
 import { isIOS } from '../../../kit/utils/platform';
+import { currentWalk, requestWalkStart } from '../../fitness';
 
 /** Three one-tap shortcuts at the top of Home: Tasbih, Water, Timer. */
 export function ShortcutsCard({
@@ -26,6 +27,19 @@ export function ShortcutsCard({
   onOptimize?: () => void;
 }) {
   const showOpt = !!onOptimize && (isIOS() || !!import.meta.env.VITE_MOCK);
+  const showWalk = isIOS() || !!import.meta.env.VITE_MOCK;
+  const [walkStart, setWalkStart] = useState<number | null>(() => currentWalk()?.startMs ?? null);
+  useEffect(() => {
+    const on = () => setWalkStart(currentWalk()?.startMs ?? null);
+    document.addEventListener('visibilitychange', on);
+    window.addEventListener('focus', on);
+    return () => {
+      document.removeEventListener('visibilitychange', on);
+      window.removeEventListener('focus', on);
+    };
+  }, []);
+  const walkSec = walkStart ? Math.max(0, Math.floor((now - walkStart) / 1000)) : 0;
+  const walkTime = `${Math.floor(walkSec / 3600) ? `${Math.floor(walkSec / 3600)}:` : ''}${String(Math.floor((walkSec % 3600) / 60)).padStart(2, '0')}:${String(walkSec % 60).padStart(2, '0')}`;
   const [dev, setDev] = useState<DeviceHealth | null>(null);
   useEffect(() => {
     if (showOpt) void optimize.device().then(setDev).catch(() => undefined);
@@ -123,6 +137,25 @@ export function ShortcutsCard({
           <NIcon name={running ? 'pause' : 'play'} size={14} stroke={2.4} />
         </button>
       </div>
+
+      {showWalk && (
+        <div
+          className={`n-short n-short--walk${walkStart ? ' is-on' : ''}`}
+          onClick={() => {
+            if (!walkStart) requestWalkStart();
+            onOpen('fitness');
+          }}
+          role="button"
+          tabIndex={0}
+        >
+          <span className="n-short__icon">{walkStart ? <i className="n-short__dot" /> : <NIcon name="play" size={16} stroke={2.4} />}</span>
+          <span className="n-short__opttext">
+            <b>{walkStart ? 'Live walk' : 'Start live walk'}</b>
+            <span className="n-short__label">{walkStart ? `${walkTime} · tap to see steps & speed` : 'Steps, speed & distance from 0'}</span>
+          </span>
+          {walkStart ? <b className="n-mono n-short__walktime">{walkTime}</b> : <NIcon name="chevronRight" size={18} className="n-short__chev" />}
+        </div>
+      )}
 
       {showOpt && (
         <div className="n-short n-short--opt" onClick={onOptimize} role="button" tabIndex={0}>

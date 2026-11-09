@@ -113,3 +113,101 @@ pub fn save_image_bytes(path: String, data_base64: String) -> CmdResult<WriteRes
     }
     write_replacing(&dest, &bytes, fmt, w, h)
 }
+
+// ----- Studio › ID / Passport Copy: corners, straighten, clean up -----
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IdDetect {
+    /// TL, TR, BR, BL — 0..1 of the photo.
+    pub corners: mackit_core::docscan::Quad,
+    /// false = nothing found; `corners` is a default frame to drag from.
+    pub found: bool,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Find the card's four corners in a photo (iPhone: Apple's Vision first, then our own finder).
+#[tauri::command]
+pub async fn idscan_detect(state: State<'_, AppState>, path: String) -> CmdResult<IdDetect> {
+    let src = PathBuf::from(&path);
+    if !src.is_absolute() || !src.is_file() {
+        return Err(invalid("expected an image file"));
+    }
+    let limits = state.limits();
+    tauri::async_runtime::spawn_blocking(move || {
+        let img = mackit_core::codec::decode_file(&src, &limits).map_err(|e| e.to_payload())?.image;
+        let (width, height) = img.dimensions();
+        let found = crate::ios_scan::detect(&src).or_else(|| mackit_core::docscan::detect_quad(&img));
+        Ok(IdDetect {
+            corners: found.map(mackit_core::docscan::order_quad).unwrap_or_else(mackit_core::docscan::default_quad),
+            found: found.is_some(),
+            width,
+            height,
+        })
+    })
+    .await
+    .map_err(|e| EngineError::Io(e.to_string()).to_payload())?
+}
+
+/// Cut out the card inside `corners`, straighten it to `aspect` (width / height; None = as
+/// measured) and, if `enhance`, make it clearer. Writes a JPEG next to Noor's cache and returns its path.
+#[tauri::command]
+pub async fn idscan_straighten(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    path: String,
+    corners: mackit_core::docscan::Quad,
+    aspect: Option<f64>,
+    enhance: bool,
+) -> CmdResult<String> {
+    use tauri::Manager;
+    let src = PathBuf::from(&path);
+    if !src.is_absolute() || !src.is_file() {
+        return Err(invalid("expected an image file"));
+    }
+    if corners.iter().any(|p| !(-0.05..=1.05).contains(&p.x) || !(-0.05..=1.05).contains(&p.y)) {
+        return Err(invalid("corners must be inside the photo"));
+    }
+    let dir = app
+        .path()
+        .app_cache_dir()
+        .map_err(|e| EngineError::Io(e.to_string()).to_payload())?
+        .join("idscan");
+    let limits = state.limits();
+    tauri::async_runtime::spawn_blocking(move || {
+        std::fs::create_dir_all(&dir).map_err(|e| EngineError::Io(e.to_string()).to_payload())?;
+        let img = mackit_core::codec::decode_file(&src, &limits).map_err(|e| e.to_payload())?.image;
+        // A hair inside the corners: no sliver of the table along the edges.
+        let q = mackit_core::docscan::inset_quad(&mackit_core::docscan::order_quad(corners), 0.012);
+        let (w, h) = mackit_core::docscan::output_size(img.width(), img.height(), &q, aspect.filter(|a| *a > 0.1 && *a < 10.0));
+        let mut out = mackit_core::docscan::warp(&img, &q, w, h);
+        if enhance {
+            mackit_core::docscan::enhance(&mut out);
+        }
+        let opts = mackit_core::codec::EncodeOptions {
+            format: ImageFormat::Jpeg,
+            quality: 93,
+            webp_lossless: false,
+            png_optimization: PngOptimization::Off,
+            flatten_background: [255, 255, 255],
+            icc_profile: None,
+        };
+        let bytes = encode(&out, &opts).map_err(|e| e.to_payload())?;
+        let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
+        let dest = dir.join(format!("card-{stamp}.jpg"));
+        std::fs::write(&dest, bytes).map_err(|e| EngineError::Io(e.to_string()).to_payload())?;
+        // Keep the cache small: drop straightened cards older than a day.
+        if let Ok(rd) = std::fs::read_dir(&dir) {
+            for e in rd.flatten() {
+                let old = e.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).is_some_and(|age| age.as_secs() > 86_400);
+                if old {
+                    let _ = std::fs::remove_file(e.path());
+                }
+            }
+        }
+        Ok(dest.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|e| EngineError::Io(e.to_string()).to_payload())?
+}

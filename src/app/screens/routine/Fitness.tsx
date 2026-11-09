@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { errorText } from '../../../island/lib/ipc';
 import { useNoor } from '../../context';
-import { ACTIVITY_INFO, BMI_INFO, cmToFtIn, fit, ftInToCm, useFitness, type FitnessOverview, type FitnessProfile, type FitnessReport } from '../../fitness';
+import { ACTIVITY_INFO, BMI_INFO, cmToFtIn, fit, ftInToCm, recentWalks, stepKcal, takeWalkStart, stepKm, useFitness, useLiveWalk, type WalkRecord, type FitnessOverview, type FitnessProfile, type FitnessReport } from '../../fitness';
 import { NIcon } from '../../icons';
 import { isIOS } from '../../../kit/utils/platform';
 import { Card, SectionTitle, Segmented, Sheet, Switch } from '../../ui';
@@ -15,6 +15,14 @@ const fmtN = (n: number) => n.toLocaleString('en-US');
 export function FitnessView() {
   const { flash } = useNoor();
   const { data, setData } = useFitness(true);
+  const liveOK = isIOS() || !!import.meta.env.VITE_MOCK;
+  const { walk, reading, elapsedS, begin, end } = useLiveWalk(liveOK);
+  const [walks, setWalks] = useState<WalkRecord[]>(() => recentWalks());
+  const [ending, setEnding] = useState(false);
+  // Home › "Start live walk" shortcut: start as soon as today's count is known.
+  useEffect(() => {
+    if (data && liveOK && takeWalkStart() && !walk) begin(data.summary.stepsToday);
+  }, [data, liveOK, walk, begin]);
   const [weighOpen, setWeighOpen] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -24,7 +32,25 @@ export function FitnessView() {
   const s = data.summary;
   const p = data.data.profile;
   const needsSetup = !p.heightCm || s.weight == null;
-  const pct = Math.min(1, s.stepsToday / Math.max(1, s.stepGoal));
+  // During a live walk: today = steps when it started + the walk's steps (until the next sync).
+  const stepsNow = Math.max(s.stepsToday, walk && reading ? walk.baseSteps + reading.steps : 0);
+  const kmToday = stepKm(stepsNow, p.heightCm);
+  const kcalToday = stepKcal(stepsNow, s.weight);
+  const wSteps = reading?.steps ?? 0;
+  const wKm = reading?.distanceM != null && reading.distanceM > 0 ? reading.distanceM / 1000 : stepKm(wSteps, p.heightCm);
+  const wKcal = stepKcal(wSteps, s.weight);
+  const kmh = reading ? reading.speedMps * 3.6 : 0;
+  const moving = kmh >= 0.5;
+  const avgKmh = elapsedS >= 30 ? wKm / (elapsedS / 3600) : 0;
+  const endWalk = async () => {
+    setEnding(true);
+    const fresh = await end({ steps: wSteps, km: Math.round(wKm * 100) / 100, kcal: wKcal, avgKmh: Math.round(avgKmh * 10) / 10 });
+    if (fresh) setData(fresh);
+    setWalks(recentWalks());
+    setEnding(false);
+    if (wSteps > 0) flash(`Walk saved · ${fmtN(wSteps)} steps added to today`);
+  };
+  const pct = Math.min(1, stepsNow / Math.max(1, s.stepGoal));
   const todaySource = data.data.steps.find((x) => x.date === s.today)?.source;
 
   return (
@@ -45,16 +71,16 @@ export function FitnessView() {
         <StepRing pct={pct} />
         <div className="n-fit__stepsinfo">
           <small>Steps today · আজকের পদক্ষেপ</small>
-          <b className="n-mono">{fmtN(s.stepsToday)}</b>
+          <b className="n-mono">{fmtN(stepsNow)}</b>
           <span>
             of {fmtN(s.stepGoal)} · {Math.round(pct * 100)}%
           </span>
           <div className="n-fit__chips">
             <span>
-              <NIcon name="pin" size={13} /> {s.kmToday} km
+              <NIcon name="pin" size={13} /> {kmToday.toFixed(1)} km
             </span>
             <span>
-              <NIcon name="flame" size={13} /> {s.kcalToday} kcal
+              <NIcon name="flame" size={13} /> {fmtN(kcalToday)} kcal
             </span>
             {s.stepStreak > 0 && (
               <span>
@@ -66,8 +92,51 @@ export function FitnessView() {
         <button className="n-fit__edit" onClick={() => setStepsOpen(true)} aria-label="Edit today's steps">
           <NIcon name="edit" size={15} />
         </button>
+        {liveOK &&
+          (walk ? (
+            <div className="n-fit__live is-on">
+              <div className="n-fit__livehead">
+                <span className={`n-fit__livebadge${moving ? ' is-moving' : ''}`}>
+                  <i /> {moving ? 'Walking' : 'Live walk'}
+                </span>
+                <b className="n-mono">{fmtDur(elapsedS)}</b>
+                <button className="n-fit__livebtn is-end" onClick={() => void endWalk()} disabled={ending}>
+                  ■ End
+                </button>
+              </div>
+              <div className="n-fit__livegrid n-fit__livegrid--4">
+                <div>
+                  <small>Steps</small>
+                  <b className="n-mono">{fmtN(wSteps)}</b>
+                  <em>{moving && reading && reading.cadence > 0 ? `${Math.round(reading.cadence)}/min` : 'this walk'}</em>
+                </div>
+                <div>
+                  <small>Speed</small>
+                  <b className="n-mono">{kmh.toFixed(1)}</b>
+                  <em>{avgKmh > 0 ? `avg ${avgKmh.toFixed(1)}` : 'km/h'}</em>
+                </div>
+                <div>
+                  <small>Distance</small>
+                  <b className="n-mono">{wKm.toFixed(2)}</b>
+                  <em>km</em>
+                </div>
+                <div>
+                  <small>Burned</small>
+                  <b className="n-mono">{fmtN(wKcal)}</b>
+                  <em>kcal</em>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button className="n-fit__livebtn is-start" onClick={() => begin(s.stepsToday)}>
+              <span>▶</span> Start live walk
+              <small>Counts steps, speed and distance from 0 · added to today when you end</small>
+            </button>
+          ))}
         <p className="n-fit__src">
-          {todaySource === 'motion'
+          {walk
+            ? 'Keep Noor open on this screen for live speed — steps are still counted if you lock the phone'
+            : todaySource === 'motion'
             ? 'Counted by your iPhone · updates when you open Noor'
             : isIOS()
               ? 'Allow Motion & Fitness for Noor to count steps automatically'
@@ -76,6 +145,8 @@ export function FitnessView() {
       </section>
 
       <WeekSteps data={data} />
+
+      {walks.length > 0 && <RecentWalks walks={walks} />}
 
       <HealthReport data={data} onSetup={() => setProfileOpen(true)} />
 
@@ -205,6 +276,51 @@ export function FitnessView() {
         />
       )}
     </div>
+  );
+}
+
+function fmtDur(sec: number) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const ss = sec % 60;
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  return h ? `${h}:${p2(m)}:${p2(ss)}` : `${p2(m)}:${p2(ss)}`;
+}
+
+function RecentWalks({ walks }: { walks: WalkRecord[] }) {
+  return (
+    <>
+      <SectionTitle>Recent walks · হাঁটা</SectionTitle>
+      <Card>
+        <ul className="n-fit__walks">
+          {walks.slice(0, 5).map((w) => {
+            const d = new Date(w.start);
+            return (
+              <li key={w.start}>
+                <span>
+                  <b>{d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</b>
+                  <small>
+                    {d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} · {fmtDur(Math.round((w.end - w.start) / 1000))}
+                  </small>
+                </span>
+                <span>
+                  <b className="n-mono">{fmtN(w.steps)}</b>
+                  <small>steps</small>
+                </span>
+                <span>
+                  <b className="n-mono">{w.km.toFixed(2)}</b>
+                  <small>km</small>
+                </span>
+                <span>
+                  <b className="n-mono">{w.kcal}</b>
+                  <small>kcal</small>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
+    </>
   );
 }
 
